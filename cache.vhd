@@ -28,7 +28,9 @@ port(
 end cache;
 
 architecture arch of cache is
-
+type state_type is (start, read, write, readcache, readmem, writecache, writemem);
+signal state : state_type;
+signal next_state : state_type;
 -- declare signals here
 
 begin
