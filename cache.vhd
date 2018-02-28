@@ -39,13 +39,16 @@ architecture arch of cache is
 -- implement the cache blocks into 4 words of 32 bits
 type cache_words is array(3 downto 0) of std_logic_vector(31 downto 0);
 
--- cache structure as labeled above
-type cache_struct record
+-- cache slots as labeled above
+type cache_block record
 	valid_bit: std_logic;
 	dirty_bit: std_logic;
 	tag: std_logic_vector(5 downto 0);
-	cache_blocks: cache_words;
+	cache_data: cache_words;
 end record;
+
+--cache structure as labeled above
+type cache_struct is array(31 downto 0) of cache_block;
 
 -- states of our FSM
 type state_type is (RESET, WAITING, CHECK_TAG_VALID, HIT, MISS, CACHE_READ, CACHE_WRITE,
@@ -63,13 +66,14 @@ cache_FSM_do: process(clock, s_write, s_read, reset)
 begin
 	index <= s_addr(8 downto 4);
 	
-	if (reset = '0') then
+	if (reset = '0') then -- Check for reset
 		state <= RESET;
-	elsif (rising_edge(clock)) THEN
+	elsif (rising_edge(clock)) THEN -- If not reset, do...
 		case state is
-			when RESET
+			when RESET -- Reset validity & dirty bits for each cache block
 				for i in 0 to 31 loop
-					
+					cache_blocks(index).valid_bit <= 0;
+					cache_blocks(index).dirty_bit <= 0;
 				end loop;
 			when WAITING
 			when CHECK_TAG_VALID
