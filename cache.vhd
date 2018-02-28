@@ -4,7 +4,7 @@ use ieee.numeric_std.all;
 
 entity cache is
 generic(
-	ram_size : INTEGER := 32768;
+	ram_size : INTEGER := 32768
 );
 port(
 	clock : in std_logic;
@@ -40,7 +40,7 @@ architecture arch of cache is
 type cache_words is array(3 downto 0) of std_logic_vector(31 downto 0);
 
 -- cache slots as labeled above
-type cache_block record
+type cache_block is record
 	valid_bit: std_logic;
 	dirty_bit: std_logic;
 	tag: std_logic_vector(5 downto 0);
@@ -48,43 +48,79 @@ type cache_block record
 end record;
 
 --cache structure as labeled above
-type cache_struct is array(31 downto 0) of cache_block;
+type cache_struct_is is array(31 downto 0) of cache_block;
 
 -- states of our FSM
-type state_type is (RESET, WAITING, CHECK_TAG_VALID, HIT, MISS, CACHE_READ, CACHE_WRITE,
+type state_type is (RESET_CACHE, WAITING, CHECK_TAG_VALID, HIT, MISS, CACHE_READ, CACHE_WRITE,
 							NOT_DIRTY, DIRTY, READ_MM, WRITE_MM);
 
 -- declare signals here
 signal state: state_type;
+signal read_waitrequest: std_logic := '1';
+signal write_waitrequest: std_logic := '1';
+signal i : INTEGER := 0;
+signal cache_struct: cache_struct_is;
 
 begin
 
 -- make circuits here
 cache_FSM_do: process(clock, s_write, s_read, reset)
-	variable index: std_logic_vector(4 downto 0);
+	variable index: INTEGER;
 	
 begin
-	index <= s_addr(8 downto 4);
+	index := to_integer(unsigned(s_addr(8 downto 4)));
 	
 	if (reset = '0') then -- Check for reset
-		state <= RESET;
+		state <= RESET_CACHE;
 	elsif (rising_edge(clock)) THEN -- If not reset, do...
 		case state is
-			when RESET -- Reset validity & dirty bits for each cache block
+			when RESET_CACHE => -- Reset validity & dirty bits for each cache block
 				for i in 0 to 31 loop
-					cache_blocks(index).valid_bit <= 0;
-					cache_blocks(index).dirty_bit <= 0;
+					cache_struct(i).valid_bit <= '0';
+					cache_struct(i).dirty_bit <= '0';
 				end loop;
-			when WAITING
-			when CHECK_TAG_VALID
-			when HIT
-			when MISS
-			when CACHE_READ
-			when CACHE_WRITE
-			when NOT_DIRTY
-			when DIRTY
-			when READ_MM
-			when WRITE_MM
+				state <= WAITING;
+			when WAITING => -- wait for when cache is called upon
+				read_waitrequest <= '1';
+				write_waitrequest <= '1';
+				if (s_read = '1' or s_write = '1' ) then
+					state <= CHECK_TAG_VALID;
+				end if;
+			when CHECK_TAG_VALID => -- checks for the address' validity in the intended index
+				-- if valid and tag is a match: hit
+				if (cache_struct(index).valid_bit = '1' and cache_struct(index).tag = s_addr(14 downto 9)) then
+					state <= HIT;
+				else -- else: miss
+					state <= MISS;
+				end if;
+			when HIT => -- data in cache, reading or writing?
+				if (s_read = '1' and s_write = '0') then
+					state <= CACHE_READ;
+				elsif (s_read = '0' and s_write = '1') then
+					state <= CACHE_WRITE;
+				end if;
+			when MISS => -- check if the data in cache is dirty
+				if (cache_struct(index).dirty_bit = '0') then
+					state <= NOT_DIRTY;
+				elsif (cache_struct(index).dirty_bit = '1') then
+					state <= DIRTY;
+				end if;
+			when CACHE_READ =>
+				-- get the data from the block array[s_addr(3 downto 2)]
+				s_readdata <= cache_struct(index).cache_data(to_integer(unsigned(s_addr(3 downto 2))));
+				read_waitrequest <= '0';
+				state <= WAITING;
+			when CACHE_WRITE =>
+				-- write the data to the block array[s_addr(3 downto 2)]
+				cache_struct(index).cache_data(to_integer(unsigned(s_addr(3 downto 2)))) <= s_writedata;
+				write_waitrequest <= '0';
+				state <= WAITING;
+			when NOT_DIRTY =>
+				state <= READ_MM;
+			when DIRTY =>
+				state <= WRITE_MM;
+			when READ_MM =>
+			when WRITE_MM =>
 		end case;
 	end if;
 			
