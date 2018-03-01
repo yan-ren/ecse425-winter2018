@@ -149,7 +149,9 @@ begin
 				m_write <= '0';
 				
 				if((read_data_counter=0) and (read_data_packet = 0)) then
+					
 					mem_addr_from_cache <= s_addr (14 downto 4)&"0000";
+					send_data_packet_thing <= to_integer(unsigned(mem_addr_from_cache));
 					read_temp_address <= to_integer(unsigned(mem_addr_from_cache));
 					cache_struct(index).cache_data(0)(7 downto 0) <= m_readdata;
 					m_addr <= read_temp_address;
@@ -160,18 +162,20 @@ begin
 				if(m_waitrequest='0') then				
 				
 					mem_addr_from_cache <= s_addr (14 downto 4)&"0000";	
+					send_data_packet_thing <= to_integer(unsigned(mem_addr_from_cache));
 
 					if(read_data_packet < 4) then
 					
-						read_temp_address <= to_integer(unsigned(mem_addr_from_cache)) + read_data_packet*4 +read_data_counter;
+						read_temp_address <= to_integer(unsigned(mem_addr_from_cache)) + (read_data_packet*4) +read_data_counter;
 
 						
 
 						m_addr <= read_temp_address;
-						cache_struct(index).cache_data(read_data_packet)(7+read_data_counter*8 downto read_data_counter*8) <= m_readdata;
+						read_data_packet_thing<=read_data_counter;
+						cache_struct(index).cache_data(read_data_packet)((7+(read_data_counter*8)) downto (read_data_counter*8)) <= m_readdata;
 						read_data_counter <= read_data_counter + 1;
-						m_read <= '1';
-						if(read_data_counter > 3) then
+						m_read <= '1' after 1ns, '0' after 2ns;
+						if((read_data_counter mod 4) = 0) then
 							read_data_packet <= read_data_packet + 1;
 							read_data_counter <= 0;
 						end if;
@@ -208,13 +212,13 @@ begin
 						m_writedata <= cache_struct(index).cache_data(send_data_packet)(7+send_data_counter*8 downto send_data_counter*8);
 						send_data_counter <= send_data_counter + 1;
 						m_write <= '1';
-						if(send_data_counter > 3) then
+						if(send_data_counter mod 4 = 0) then
 							send_data_packet <= send_data_packet + 1;
 							send_data_counter <= 0;
 						end if;
 					end if;
 				end if;
-				if((read_data_counter*read_data_packet) = 16) then
+				if((send_data_counter*send_data_packet) = 16) then
 					state<=READ_MM;
 				end if;
 
