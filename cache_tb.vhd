@@ -155,32 +155,13 @@ begin
     --Test cases 9, 10, 11 and 12 cannot be tested for since an invalid block cannot be dirty.
 	s_write <= '0';
 	s_read <= '0';
- 	--Test Case #15
-	--writes to an empty slot with tag equal
-	thing <= 15;
-	s_addr <= "00000000000000000001001001001000";
-	s_writedata <= "00110101001010001101010101010111";
-	s_write <= '1';	
-	WAIT until s_waitrequest = '0';
-	s_write <= '0';
-	s_read <= '0';
-	WAIT FOR 1*clk_period;
-	
-	--Test Case #1
-	--reads info that has been written but not saved in memory
-	thing <= 1;
-	s_addr <= "00000000000000000001001001001000";
-	s_read <= '1';
-	WAIT until s_waitrequest = '0';
-	s_write <= '0';
-	s_read <= '0';
-	WAIT FOR 1*clk_period;
-	
+ 	
 
 
 
-	--Test Case #13 
-	--reads an empty slot with tag equal
+	--Test Case #13 &14: reads an empty slot
+		--If the cache invalid, the tag will automatically not match
+		--since there is no data at the current index.
 	thing <= 13;
 	s_addr <= "00000000000000000111000010111100";
 	s_read <= '1';
@@ -189,31 +170,12 @@ begin
 	s_read <= '0';
 	WAIT FOR 1*clk_period;
 	
-	--Test Case #14 
-	--reads an empty slot with tag not equal
-	thing <= 14;
-	s_addr <= "00000000000000000111010010111100";
-	s_read <= '1';
-	WAIT until s_waitrequest = '0';
-	s_write <= '0';
-	s_read <= '0';
-	WAIT FOR 1*clk_period;
 	
-	--Test Case #15
-	--writes to an empty slot with tag equal
+	--Test Case #15&16: writes to an empty slot with tag equal
+		--If the cache invalid, the tag will automatically not match
+		--since there is no data at the current index.
 	thing <= 15;
 	s_addr <= "00000000000000000111000010111100";
-	s_writedata <= "00110101001010001101010101010111";
-	s_write <= '1';
-	WAIT until s_waitrequest = '0';
-	s_write <= '0';
-	s_read <= '0';
-	WAIT FOR 1*clk_period;
-	
-	--Test Case #16
-	thing <= 16;
-	--writes to an empty slot with tag not equal
-	s_addr <= "00000000000000000111010010111100";
 	s_writedata <= "00110101001010001101010101010111";
 	s_write <= '1';
 	WAIT until s_waitrequest = '0';
@@ -305,7 +267,7 @@ begin
 	s_read <= '0';
 	WAIT FOR 1*clk_period;
 	
-	reset <= '0';
+	reset <= '1';
 	WAIT FOR 3*clk_period;
 	
 end process;
