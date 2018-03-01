@@ -1,3 +1,9 @@
+--ECSE 425 Lab 3 Cache Testbench
+--Tara Tabet	260625552
+--Shi Yu Liu	260683360
+--Edward Yu	260------
+--Ryan Ren	260------
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -22,11 +28,6 @@ port(
     s_write : in std_logic;
     s_writedata : in std_logic_vector (31 downto 0);
     s_waitrequest : out std_logic; 
-    
-    state_thing : out integer;
-    send_data_packet_thing : out integer;
-    read_data_packet_thing : out integer;
-    thing : out integer;
 
     m_addr : out integer range 0 to ram_size-1;
     m_read : out std_logic;
@@ -66,11 +67,6 @@ signal s_write : std_logic;
 signal s_writedata : std_logic_vector (31 downto 0);
 signal s_waitrequest : std_logic;
 
-signal state_thing : integer;
-signal send_data_packet_thing : integer;
-signal read_data_packet_thing : integer;
-signal thing : integer;
-
 signal m_addr : integer range 0 to 2147483647;
 signal m_read : std_logic;
 signal m_readdata : std_logic_vector (7 downto 0);
@@ -93,10 +89,6 @@ port map(
     s_write => s_write,
     s_writedata => s_writedata,
     s_waitrequest => s_waitrequest,
-
-    state_thing => state_thing,
-    send_data_packet_thing => send_data_packet_thing,
-    read_data_packet_thing => read_data_packet_thing,
 
     m_addr => m_addr,
     m_read => m_read,
@@ -162,7 +154,6 @@ begin
 	--Test Case #13 &14: reads an empty slot
 		--If the cache invalid, the tag will automatically not match
 		--since there is no data at the current index.
-	thing <= 13;
 	s_addr <= "00000000000000000111000010111100";
 	s_read <= '1';
 	WAIT until s_waitrequest = '0';
@@ -174,7 +165,6 @@ begin
 	--Test Case #15&16: writes to an empty slot with tag equal
 		--If the cache invalid, the tag will automatically not match
 		--since there is no data at the current index.
-	thing <= 15;
 	s_addr <= "00000000000000000111000010111100";
 	s_writedata <= "00110101001010001101010101010111";
 	s_write <= '1';
@@ -185,7 +175,6 @@ begin
 	
 	--Test Case #1
 	--reads info that has been written but not saved in memory
-	thing <= 1;
 	s_addr <= "00000000000000000111000010111100";
 	s_read <= '1';
 	WAIT until s_waitrequest = '0';
@@ -195,7 +184,6 @@ begin
 	
 	--Test Case #2
 	--reads info that has been written but not saved in memory with not equal tag
-	thing <= 2;
 	s_addr <= "00000000000000000111010010111100";
 	s_read <= '1';
 	WAIT until s_waitrequest = '0';
@@ -205,7 +193,6 @@ begin
 	
 	--Test Case #4
 	--write to a spot that already has info with not equal tag
-	thing <= 4;
 	s_addr <= "00000000000000000111110010111100";
 	s_writedata <= "00110101001010010001010101010111";
 	s_write <= '1';
@@ -216,7 +203,6 @@ begin
 	
 	--Test Case #3
 	--write to a spot that already has info 
-	thing <= 3;
 	s_addr <= "00000000000000000111000010111100";
 	s_writedata <= "00110101001010010001010101010111";
 	s_write <= '1';
@@ -227,7 +213,6 @@ begin
 	
 	--Test Case #5
 	--reads info that has been written but not saved in memory
-	thing <= 5;
 	s_addr <= "00000000000000000111000010111100";
 	s_read <= '1';
 	WAIT until s_waitrequest = '0';
@@ -237,7 +222,6 @@ begin
 	
 	--Test Case #6
 	--reads info that has been written but not saved in memory with not equal tag
-	thing <= 6;
 	s_addr <= "00000000000000000111110010111100";
 	s_read <= '1';
 	WAIT until s_waitrequest = '0';
@@ -247,7 +231,6 @@ begin
 	
 	--Test Case #8
 	--write to a spot that already has info with not equal tag
-	thing <= 8;
 	s_addr <= "00000000000000000111110010111100";
 	s_writedata <= "00110101001010010001010101010111";
 	s_write <= '1';
@@ -258,7 +241,6 @@ begin
 	
 	--Test Case #7
 	--write to a spot that already has info
-	thing <= 7; 
 	s_addr <= "00000000000000000111000010111100";
 	s_writedata <= "00110101001010010001010101010111";
 	s_write <= '1';

@@ -1,3 +1,9 @@
+--ECSE 425 Lab 3 Cache VHDL
+--Tara Tabet	260625552
+--Shi Yu Liu	260683360
+--Edward Yu	260------
+--Ryan Ren	260------
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -17,11 +23,6 @@ port(
 	s_write : in std_logic;
 	s_writedata : in std_logic_vector (31 downto 0);
 	s_waitrequest : out std_logic; 
-
-	state_thing : out integer;
-  	send_data_packet_thing : out integer;
-    	read_data_packet_thing : out integer;
-	thing : out integer;
     
 	m_addr : out integer range 0 to ram_size-1;
 	m_read : out std_logic;
@@ -57,7 +58,7 @@ type cache_struct_is is array(31 downto 0) of cache_block;
 
 -- states of our FSM
 type state_type is (RESET_CACHE, WAITING, CHECK_TAG_VALID, HIT, MISS, CACHE_READ, CACHE_WRITE,
-							NOT_DIRTY, DIRTY, READ_MM, READ_MM_WAIT, WRITE_MM);
+							NOT_DIRTY, DIRTY, READ_MM, READ_MM_WAIT, WRITE_MM, WRITE_MM_WAIT);
 
 -- declare signals here
 signal state: state_type;
@@ -72,6 +73,7 @@ signal read_data_counter : integer := 0;
 signal send_temp_address : integer := 0;
 signal read_temp_address : integer := 0;
 signal read_mm_waiting : integer := 1;
+signal write_mm_waiting : integer := 1;
 
 signal mem_addr_from_cache : STD_LOGIC_VECTOR (14 downto 0);
 
@@ -90,14 +92,13 @@ begin
 	elsif (rising_edge(clock)) THEN -- If not reset, do...
 		case state is
 			when RESET_CACHE => -- Reset validity & dirty bits for each cache block
-				state_thing<=0;
 				for i in 0 to 31 loop
 					cache_struct(i).valid_bit <= '0';
 					cache_struct(i).dirty_bit <= '0';
 				end loop;
 				state <= WAITING;
 			when WAITING => -- wait for when cache is called upon
-				state_thing<=1;
+				
 				read_waitrequest <= '1';
 				write_waitrequest <= '1';
 				
@@ -105,7 +106,7 @@ begin
 					state <= CHECK_TAG_VALID;
 				end if;
 			when CHECK_TAG_VALID => -- checks for the address' validity in the intended index
-				state_thing<=2;
+				
 				-- if valid and tag is a match: hit
 				if (cache_struct(index).valid_bit = '1' and cache_struct(index).tag = s_addr(14 downto 9)) then
 					state <= HIT;
@@ -113,21 +114,21 @@ begin
 					state <= MISS;
 				end if;
 			when HIT => -- data in cache, reading or writing?
-				state_thing<=3;
+				
 				if (s_read = '1' and s_write = '0') then
 					state <= CACHE_READ;
 				elsif (s_read = '0' and s_write = '1') then
 					state <= CACHE_WRITE;
 				end if;
 			when MISS => -- check if the data in cache is dirty
-				state_thing<=4;
+				
 				send_data_packet <= 0;
 		  		read_data_packet <= 0;
 				send_data_counter <= 0;
 		  		read_data_counter <= 0;
-				read_data_packet_thing<=read_data_counter;
+				
 				mem_addr_from_cache <= s_addr (14 downto 4)&"0000";	
-				send_data_packet_thing <= to_integer(unsigned(mem_addr_from_cache));
+				
 				read_temp_address <= to_integer(unsigned(mem_addr_from_cache));
 				if (cache_struct(index).dirty_bit = '0') then
 					state <= NOT_DIRTY;
@@ -135,13 +136,13 @@ begin
 					state <= DIRTY;
 				end if;
 			when CACHE_READ =>
-				state_thing<=5;
+				
 				-- get the data from the block array[s_addr(3 downto 2)]
 				s_readdata <= cache_struct(index).cache_data(to_integer(unsigned(s_addr(3 downto 2))));
 				read_waitrequest <= '0';
 				state <= WAITING;
 			when CACHE_WRITE =>
-				state_thing<=6;
+				
 				-- write the data to the block array[s_addr(3 downto 2)]
 				cache_struct(index).cache_data(to_integer(unsigned(s_addr(3 downto 2)))) <= s_writedata;
 				cache_struct(index).tag <= s_addr(14 downto 9);
@@ -149,84 +150,82 @@ begin
 				write_waitrequest <= '0';
 				state <= WAITING;
 			when NOT_DIRTY =>
-				state_thing<=7;
+				
 				state <= READ_MM;
 			when DIRTY =>
-				state_thing<=8;
+				
 				state <= WRITE_MM;
 			when READ_MM =>
-				state_thing<=9;
+				--resets memory read and write to 0
 				m_read <= '0';
 				m_write <= '0';
-
 				
+				--checks if all 16 bytes have been read, sets valid bit to 1, then goes to the next state
 				if(read_data_packet = 4) then
 					cache_struct(index).valid_bit <= '1';
 					state<=HIT;
 				end if;
 
 				mem_addr_from_cache <= s_addr (14 downto 4)&"0000";	
-				send_data_packet_thing <= to_integer(unsigned(mem_addr_from_cache));
+				
+				--gets the first byte
 				if((read_data_counter=0) and (read_data_packet = 0)) then
 					
-					--mem_addr_from_cache <= s_addr (14 downto 4)&"0000";
-					send_data_packet_thing <= to_integer(unsigned(mem_addr_from_cache));
 					read_temp_address <= to_integer(unsigned(mem_addr_from_cache));
 				
 					read_data_counter <= read_data_counter + 1;
 					m_addr <= read_temp_address;
 					m_read <= '1'after 1ns, '0' after 2ns;
 					cache_struct(index).cache_data(0)(7 downto 0) <= m_readdata;
-					read_data_packet_thing<=read_data_counter;
+					
 					state <= READ_MM_WAIT;
 					
 				end if;
 				
+				--gets remaining bytes in order if memory is free (1 byte at a time before going to the waiting state)
 				if(read_mm_waiting = 0) then				
 					
 					read_mm_waiting <= 1;
-					--mem_addr_from_cache <= s_addr (14 downto 4)&"0000";	
-					send_data_packet_thing <= to_integer(unsigned(mem_addr_from_cache));
-
-					
-
+			
 					if(read_data_packet < 4) then
 					
 						read_temp_address <= to_integer(unsigned(mem_addr_from_cache)) + (read_data_packet*4) +read_data_counter;
-
-		
-
 						m_addr <= read_temp_address;
-						read_data_packet_thing<=read_data_counter;
 						cache_struct(index).cache_data(read_data_packet)((7+(read_data_counter*8)) downto (read_data_counter*8)) <= m_readdata;
 						read_data_counter <= read_data_counter + 1;
 						m_read <= '1' after 1ns, '0' after 2ns;
 						
-						read_data_packet_thing<=read_data_counter;
 					end if;
+
+				--goes to a waiting state if m_waitrequest is 1 (memory is busy)
 				elsif(m_waitrequest = '1') then
 					state <= READ_MM_WAIT;	
 				end if;		
-				
-				
-				
+
+				--if all four bytes for the current word have been read, then the byte counter is reset and the word counter is incremented
 				if(read_data_counter = 4) then
 					read_data_packet <= read_data_packet + 1;
 					read_data_counter <= 0;
 				end if;
 			
-			when READ_MM_WAIT =>
+			when READ_MM_WAIT => --wait for main memory to process te read
 				if(m_waitrequest = '0') then
 					state <= READ_MM;
 					read_mm_waiting <= 0;
 				end if;
+
+			when WRITE_MM_WAIT => --wait for main memory to process te read
+				if(m_waitrequest = '0') then
+					state <= WRITE_MM;
+					write_mm_waiting <= 0;
+				end if;
 			
 			when WRITE_MM =>
-				state_thing<=10;
+				--resets memory read and write to 0
 				m_read <= '0';
 				m_write <= '0';
 				
-
+				--checks if all 16 bytes have been sent, sets dirty bit to 1, then goes to the next state
 				if(send_data_packet = 4) then
 					cache_struct(index).dirty_bit <= '0';
 					state<=READ_MM;
@@ -234,6 +233,7 @@ begin
 
 				mem_addr_from_cache <= s_addr (14 downto 4)&"0000";
 
+				--sends the first byte
 				if((send_data_counter=0) and (send_data_packet = 0)) then
 					
 					send_temp_address <= to_integer(unsigned(mem_addr_from_cache));
@@ -241,27 +241,32 @@ begin
 					m_addr <= send_temp_address;
 					m_write <= '1' after 1ns, '0' after 2ns;
 					m_writedata <= cache_struct(index).cache_data(0)(7 downto 0);
+					state <= WRITE_MM_WAIT;
 					
 				end if;
 
-				if(m_waitrequest='0') then					
+				--sends remaining bytes in order if memory is free (1 byte at a time before going to the waiting state)
+				if(write_mm_waiting = 0) then					
 				
-					--mem_addr_from_cache <= s_addr (14 downto 4)&"0000";	
+					write_mm_waiting <= 1;
 
 					if(send_data_packet < 4) then
 					
 						send_temp_address <= to_integer(unsigned(mem_addr_from_cache)) + send_data_packet*4 +send_data_counter;
-					
-						
 						m_addr <= send_temp_address;
 						m_writedata <= cache_struct(index).cache_data(send_data_packet)(7+send_data_counter*8 downto send_data_counter*8);
 						send_data_counter <= send_data_counter + 1;
 						m_write <= '1' after 1ns, '0' after 2ns;
 						
 					end if;
+
+				--goes to a waiting state if m_waitrequest is 1 (memory is busy)
+				elsif(m_waitrequest = '1') then
+					state <= WRITE_MM_WAIT;	
 				end if;
+
+				--if all four bytes for the current word have been written, then the byte counter is reset and the word counter is incremented
 				if(send_data_counter =4) then
-					
 					send_data_packet <= send_data_packet + 1;
 					send_data_counter <= 0;
 				end if;
