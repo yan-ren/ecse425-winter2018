@@ -1,7 +1,7 @@
 --ECSE 425 Lab 3 Cache VHDL
 --Tara Tabet	260625552
 --Shi Yu Liu	260683360
---Edward Yu	260------
+--Edward Yu	260617063
 --Ryan Ren	260------
 
 library ieee;
