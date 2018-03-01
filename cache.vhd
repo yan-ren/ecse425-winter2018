@@ -57,7 +57,7 @@ type cache_struct_is is array(31 downto 0) of cache_block;
 
 -- states of our FSM
 type state_type is (RESET_CACHE, WAITING, CHECK_TAG_VALID, HIT, MISS, CACHE_READ, CACHE_WRITE,
-							NOT_DIRTY, DIRTY, READ_MM, WRITE_MM);
+							NOT_DIRTY, DIRTY, READ_MM, READ_MM_WAIT, WRITE_MM);
 
 -- declare signals here
 signal state: state_type;
@@ -71,6 +71,7 @@ signal send_data_counter : integer := 0;
 signal read_data_counter : integer := 0;
 signal send_temp_address : integer := 0;
 signal read_temp_address : integer := 0;
+signal read_mm_waiting : integer := 1;
 
 signal mem_addr_from_cache : STD_LOGIC_VECTOR (14 downto 0);
 
@@ -177,11 +178,13 @@ begin
 					m_read <= '1'after 1ns, '0' after 2ns;
 					cache_struct(index).cache_data(0)(7 downto 0) <= m_readdata;
 					read_data_packet_thing<=read_data_counter;
+					state <= READ_MM_WAIT;
 					
 				end if;
-
-				if(m_waitrequest='0') then				
 				
+				if(read_mm_waiting = 0) then				
+					
+					read_mm_waiting <= 1;
 					--mem_addr_from_cache <= s_addr (14 downto 4)&"0000";	
 					send_data_packet_thing <= to_integer(unsigned(mem_addr_from_cache));
 
@@ -201,7 +204,8 @@ begin
 						
 						read_data_packet_thing<=read_data_counter;
 					end if;
-					
+				elsif(m_waitrequest = '1') then
+					state <= READ_MM_WAIT;	
 				end if;		
 				
 				
@@ -210,7 +214,13 @@ begin
 					read_data_packet <= read_data_packet + 1;
 					read_data_counter <= 0;
 				end if;
-
+			
+			when READ_MM_WAIT =>
+				if(m_waitrequest = '0') then
+					state <= READ_MM;
+					read_mm_waiting <= 0;
+				end if;
+			
 			when WRITE_MM =>
 				state_thing<=10;
 				m_read <= '0';
