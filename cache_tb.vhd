@@ -2,7 +2,7 @@
 --Tara Tabet	260625552
 --Shi Yu Liu	260683360
 --Edward Yu	260617063
---Ryan Ren	260------
+--Ryan Ren	260580535
 
 library ieee;
 use ieee.std_logic_1164.all;
