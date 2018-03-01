@@ -99,7 +99,7 @@ begin
 				state_thing<=1;
 				read_waitrequest <= '1';
 				write_waitrequest <= '1';
-				thing<=0;
+				
 				if (s_read = '1' or s_write = '1' ) then
 					state <= CHECK_TAG_VALID;
 				end if;
@@ -177,7 +177,7 @@ begin
 					m_read <= '1'after 1ns, '0' after 2ns;
 					cache_struct(index).cache_data(0)(7 downto 0) <= m_readdata;
 					read_data_packet_thing<=read_data_counter;
-					thing<=read_temp_address;
+					
 				end if;
 
 				if(m_waitrequest='0') then				
@@ -216,18 +216,27 @@ begin
 				m_read <= '0';
 				m_write <= '0';
 				
+
+				if(send_data_packet = 4) then
+					cache_struct(index).dirty_bit <= '0';
+					state<=READ_MM;
+				end if;
+
+				mem_addr_from_cache <= s_addr (14 downto 4)&"0000";
+
 				if((send_data_counter=0) and (send_data_packet = 0)) then
-					mem_addr_from_cache <= s_addr (14 downto 4)&"0000";
+					
 					send_temp_address <= to_integer(unsigned(mem_addr_from_cache));
-					m_writedata <= cache_struct(index).cache_data(0)(7 downto 0);
-					m_addr <= send_temp_address;
 					send_data_counter <= send_data_counter + 1;
-					m_write <= '1';
+					m_addr <= send_temp_address;
+					m_write <= '1' after 1ns, '0' after 2ns;
+					m_writedata <= cache_struct(index).cache_data(0)(7 downto 0);
+					
 				end if;
 
 				if(m_waitrequest='0') then					
 				
-					mem_addr_from_cache <= s_addr (14 downto 4)&"0000";	
+					--mem_addr_from_cache <= s_addr (14 downto 4)&"0000";	
 
 					if(send_data_packet < 4) then
 					
@@ -237,15 +246,14 @@ begin
 						m_addr <= send_temp_address;
 						m_writedata <= cache_struct(index).cache_data(send_data_packet)(7+send_data_counter*8 downto send_data_counter*8);
 						send_data_counter <= send_data_counter + 1;
-						m_write <= '1';
-						if(send_data_counter mod 4 = 0) then
-							send_data_packet <= send_data_packet + 1;
-							send_data_counter <= 0;
-						end if;
+						m_write <= '1' after 1ns, '0' after 2ns;
+						
 					end if;
 				end if;
-				if((send_data_counter*send_data_packet) = 16) then
-					state<=READ_MM;
+				if(send_data_counter =4) then
+					
+					send_data_packet <= send_data_packet + 1;
+					send_data_counter <= 0;
 				end if;
 
 		end case;

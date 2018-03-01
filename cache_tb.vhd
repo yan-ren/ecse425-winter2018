@@ -97,7 +97,6 @@ port map(
     state_thing => state_thing,
     send_data_packet_thing => send_data_packet_thing,
     read_data_packet_thing => read_data_packet_thing,
-    thing => thing,
 
     m_addr => m_addr,
     m_read => m_read,
@@ -158,6 +157,7 @@ begin
 	s_read <= '0';
  	--Test Case #15
 	--writes to an empty slot with tag equal
+	thing <= 15;
 	s_addr <= "00000000000000000001001001001000";
 	s_writedata <= "00110101001010001101010101010111";
 	s_write <= '1';	
@@ -168,12 +168,143 @@ begin
 	
 	--Test Case #1
 	--reads info that has been written but not saved in memory
+	thing <= 1;
 	s_addr <= "00000000000000000001001001001000";
 	s_read <= '1';
 	WAIT until s_waitrequest = '0';
 	s_write <= '0';
 	s_read <= '0';
 	WAIT FOR 1*clk_period;
+	
+
+
+
+	--Test Case #13 
+	--reads an empty slot with tag equal
+	thing <= 13;
+	s_addr <= "00000000000000000111000010111100";
+	s_read <= '1';
+	WAIT until s_waitrequest = '0';
+	s_write <= '0';
+	s_read <= '0';
+	WAIT FOR 1*clk_period;
+	
+	--Test Case #14 
+	--reads an empty slot with tag not equal
+	thing <= 14;
+	s_addr <= "00000000000000000111010010111100";
+	s_read <= '1';
+	WAIT until s_waitrequest = '0';
+	s_write <= '0';
+	s_read <= '0';
+	WAIT FOR 1*clk_period;
+	
+	--Test Case #15
+	--writes to an empty slot with tag equal
+	thing <= 15;
+	s_addr <= "00000000000000000111000010111100";
+	s_writedata <= "00110101001010001101010101010111";
+	s_write <= '1';
+	WAIT until s_waitrequest = '0';
+	s_write <= '0';
+	s_read <= '0';
+	WAIT FOR 1*clk_period;
+	
+	--Test Case #16
+	thing <= 16;
+	--writes to an empty slot with tag not equal
+	s_addr <= "00000000000000000111010010111100";
+	s_writedata <= "00110101001010001101010101010111";
+	s_write <= '1';
+	WAIT until s_waitrequest = '0';
+	s_write <= '0';
+	s_read <= '0';
+	WAIT FOR 1*clk_period;
+	
+	--Test Case #1
+	--reads info that has been written but not saved in memory
+	thing <= 1;
+	s_addr <= "00000000000000000111000010111100";
+	s_read <= '1';
+	WAIT until s_waitrequest = '0';
+	s_write <= '0';
+	s_read <= '0';
+	WAIT FOR 1*clk_period;
+	
+	--Test Case #2
+	--reads info that has been written but not saved in memory with not equal tag
+	thing <= 2;
+	s_addr <= "00000000000000000111010010111100";
+	s_read <= '1';
+	WAIT until s_waitrequest = '0';
+	s_write <= '0';
+	s_read <= '0';
+	WAIT FOR 1*clk_period;
+	
+	--Test Case #4
+	--write to a spot that already has info with not equal tag
+	thing <= 4;
+	s_addr <= "00000000000000000111110010111100";
+	s_writedata <= "00110101001010010001010101010111";
+	s_write <= '1';
+	WAIT until s_waitrequest = '0';
+	s_write <= '0';
+	s_read <= '0';
+	WAIT FOR 1*clk_period;
+	
+	--Test Case #3
+	--write to a spot that already has info 
+	thing <= 3;
+	s_addr <= "00000000000000000111000010111100";
+	s_writedata <= "00110101001010010001010101010111";
+	s_write <= '1';
+	WAIT until s_waitrequest = '0';
+	s_write <= '0';
+	s_read <= '0';
+	WAIT FOR 1*clk_period;
+	
+	--Test Case #5
+	--reads info that has been written but not saved in memory
+	thing <= 5;
+	s_addr <= "00000000000000000111000010111100";
+	s_read <= '1';
+	WAIT until s_waitrequest = '0';
+	s_write <= '0';
+	s_read <= '0';
+	WAIT FOR 1*clk_period;
+	
+	--Test Case #6
+	--reads info that has been written but not saved in memory with not equal tag
+	thing <= 6;
+	s_addr <= "00000000000000000111110010111100";
+	s_read <= '1';
+	WAIT until s_waitrequest = '0';
+	s_write <= '0';
+	s_read <= '0';
+	WAIT FOR 1*clk_period;
+	
+	--Test Case #8
+	--write to a spot that already has info with not equal tag
+	thing <= 8;
+	s_addr <= "00000000000000000111110010111100";
+	s_writedata <= "00110101001010010001010101010111";
+	s_write <= '1';
+	WAIT until s_waitrequest = '0';
+	s_write <= '0';
+	s_read <= '0';
+	WAIT FOR 1*clk_period;
+	
+	--Test Case #7
+	--write to a spot that already has info
+	thing <= 7; 
+	s_addr <= "00000000000000000111000010111100";
+	s_writedata <= "00110101001010010001010101010111";
+	s_write <= '1';
+	WAIT until s_waitrequest = '0';
+	s_write <= '0';
+	s_read <= '0';
+	WAIT FOR 1*clk_period;
+	
 	reset <= '0';
 	WAIT FOR 3*clk_period;
 	
