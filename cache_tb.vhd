@@ -1,3 +1,9 @@
+--ECSE 425 Lab 3 Cache Testbench
+--Tara Tabet	260625552
+--Shi Yu Liu	260683360
+--Edward Yu	260617063
+--Ryan Ren	260580535
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -9,7 +15,7 @@ architecture behavior of cache_tb is
 
 component cache is
 generic(
-    ram_size : INTEGER := 32768;
+    ram_size : INTEGER := 32768
 );
 port(
     clock : in std_logic;
@@ -114,8 +120,137 @@ end process;
 
 test_process : process
 begin
-
+    
 -- put your tests here
+	
+	--We will test for different combinations of {valid/invalid block, 
+  --dirty/not dirty block, access is read/write, tag is equal/tag is not equal}
+  --  
+  --There are 16 test cases:
+    -- #1:  {Valid, Dirty, Read, Tag Equal}
+    -- #2:  {Valid, Dirty, Read, Tag Not Equal}
+    -- #3:  {Valid, Dirty, Write, Tag Equal}
+    -- #4:  {Valid, Dirty, Write, Tag Not Equal}
+    -- #5:  {Valid, Not Dirty, Read, Tag Equal}
+    -- #6:  {Valid, Not Dirty, Read, Tag Not Equal}
+    -- #7:  {Valid, Not Dirty, Write, Tag Equal}
+    -- #8:  {Valid, Not Dirty, Write, Tag Not Equal}
+    -- #9:  {Invalid, Dirty, Read, Tag Equal}
+    -- #10: {Invalid, Dirty, Read, Tag Not Equal}
+    -- #11: {Invalid, Dirty, Write, Tag Equal}
+    -- #12: {Invalid, Dirty, Write, Tag Not Equal}
+    -- #13: {Invalid, Not Dirty, Read, Tag Equal}
+    -- #14: {Invalid, Not Dirty, Read, Tag Not Equal}
+    -- #15: {Invalid, Not Dirty, Write, Tag Equal}
+    -- #16: {Invalid, Not Dirty, Write, Tag Not Equal}
+    
+    --Test cases 9, 10, 11 and 12 cannot be tested for since an invalid block cannot be dirty.
+	s_write <= '0';
+	s_read <= '0';
+ 	
+
+
+
+	--Test Case #13 &14: reads an empty slot
+		--If the cache invalid, the tag will automatically not match
+		--since there is no data at the current index.
+	s_addr <= "00000000000000000111000010111100";
+	s_read <= '1';
+	WAIT until s_waitrequest = '0';
+	s_write <= '0';
+	s_read <= '0';
+	WAIT FOR 1*clk_period;
+	
+	
+	--Test Case #15&16: writes to an empty slot with tag equal
+		--If the cache invalid, the tag will automatically not match
+		--since there is no data at the current index.
+	s_addr <= "00000000000000000111000010111100";
+	s_writedata <= "00110101001010001101010101010111";
+	s_write <= '1';
+	WAIT until s_waitrequest = '0';
+	s_write <= '0';
+	s_read <= '0';
+	WAIT FOR 1*clk_period;
+	
+	--Test Case #1
+	--reads info that has been written but not saved in memory
+	s_addr <= "00000000000000000111000010111100";
+	s_read <= '1';
+	WAIT until s_waitrequest = '0';
+	s_write <= '0';
+	s_read <= '0';
+	WAIT FOR 1*clk_period;
+	
+	--Test Case #2
+	--reads info that has been written but not saved in memory with not equal tag
+	s_addr <= "00000000000000000111010010111100";
+	s_read <= '1';
+	WAIT until s_waitrequest = '0';
+	s_write <= '0';
+	s_read <= '0';
+	WAIT FOR 1*clk_period;
+	
+	--Test Case #4
+	--write to a spot that already has info with not equal tag
+	s_addr <= "00000000000000000111110010111100";
+	s_writedata <= "00110101001010010001010101010111";
+	s_write <= '1';
+	WAIT until s_waitrequest = '0';
+	s_write <= '0';
+	s_read <= '0';
+	WAIT FOR 1*clk_period;
+	
+	--Test Case #3
+	--write to a spot that already has info 
+	s_addr <= "00000000000000000111000010111100";
+	s_writedata <= "00110101001010010001010101010111";
+	s_write <= '1';
+	WAIT until s_waitrequest = '0';
+	s_write <= '0';
+	s_read <= '0';
+	WAIT FOR 1*clk_period;
+	
+	--Test Case #5
+	--reads info that has been written but not saved in memory
+	s_addr <= "00000000000000000111000010111100";
+	s_read <= '1';
+	WAIT until s_waitrequest = '0';
+	s_write <= '0';
+	s_read <= '0';
+	WAIT FOR 1*clk_period;
+	
+	--Test Case #6
+	--reads info that has been written but not saved in memory with not equal tag
+	s_addr <= "00000000000000000111110010111100";
+	s_read <= '1';
+	WAIT until s_waitrequest = '0';
+	s_write <= '0';
+	s_read <= '0';
+	WAIT FOR 1*clk_period;
+	
+	--Test Case #8
+	--write to a spot that already has info with not equal tag
+	s_addr <= "00000000000000000111110010111100";
+	s_writedata <= "00110101001010010001010101010111";
+	s_write <= '1';
+	WAIT until s_waitrequest = '0';
+	s_write <= '0';
+	s_read <= '0';
+	WAIT FOR 1*clk_period;
+	
+	--Test Case #7
+	--write to a spot that already has info
+	s_addr <= "00000000000000000111000010111100";
+	s_writedata <= "00110101001010010001010101010111";
+	s_write <= '1';
+	WAIT until s_waitrequest = '0';
+	s_write <= '0';
+	s_read <= '0';
+	WAIT FOR 1*clk_period;
+	
+	reset <= '1';
+	WAIT FOR 3*clk_period;
 	
 end process;
 	
