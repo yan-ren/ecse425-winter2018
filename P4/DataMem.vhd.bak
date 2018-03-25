@@ -69,6 +69,7 @@ begin
              			ram_block((to_integer(signed(ALU_result))) + i - 1) <= rt_data(8*i - 1 downto 8*i - 8);
 				report "rt_data is " & integer'image(to_integer(signed(rt_data(8*i - 1 downto 8*i - 8))));
 				report "store successfully!";
+				report "ram_block is= " & integer'image(to_integer(signed(ram_block((to_integer(signed(ALU_result))) + i - 1))));
          	 	end loop;
         	-- the opcode is lw 
         	elsif(opcode = "100011")then

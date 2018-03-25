@@ -41,11 +41,9 @@ entity EX is
               des_addr_out: out std_logic_vector(4 downto 0);
               ALU_result: out std_logic_vector(31 downto 0);
               rt_data: out std_logic_vector(31 downto 0);
-	      --   first bit for wb_signal, 4-0 for des_adr
-              MEM_control_buffer_out: out std_logic_vector(5 downto 0); 
-	      --  first bit for wb_signal, 4-0 for des_adr
-              WB_control_buffer_out: out std_logic_vector(5 downto 0); 
-              -- for id stage 
+              MEM_control_buffer_out: out std_logic_vector(5 downto 0); --   first bit for wb_signal, 4-0 for des_adr
+              WB_control_buffer_out: out std_logic_vector(5 downto 0); --  first bit for wb_signal, 4-0 for des_adr
+             -- for id stage 
 	      EX_control_buffer_out: out std_logic_vector(10 downto 0) --  first bit for mem_read, 9-5 for rt, 4-0 for rs
 	      
 	);
