@@ -49,9 +49,9 @@ ENTITY DataMem IS
 				dest_addr_out <= dest_addr_in;
 				bran_addr <= bran_addr_in;
 				bran_taken_out <= bran_taken;
+
 				-- the opcode is sw
 				IF (opcode = "101011") THEN
-					-- bran_addr <= std_logic_vector(to_unsigned(0, 32));
 					FOR i IN 1 TO 4 LOOP
 						ram_block((to_integer(signed(ALU_result))) + i - 1) <= rt_data(8 * i - 1 DOWNTO 8 * i - 8);
 						REPORT "rt_data IS " & INTEGER'image(to_integer(signed(rt_data(8 * i - 1 DOWNTO 8 * i - 8))));
@@ -59,13 +59,11 @@ ENTITY DataMem IS
 					END LOOP;
 					-- the opcode is lw
 				ELSIF (opcode = "100011") THEN
-					-- bran_addr <= std_logic_vector(to_unsigned(0, 32));
 					FOR i IN 0 TO 3 LOOP
 						mem_data(8 * i + 7 DOWNTO 8 * i) <= ram_block(to_integer(signed(ALU_result)) + i);
 					END LOOP;
 					-- the opcode is other
 				ELSE
-					-- bran_addr <= std_logic_vector(to_unsigned(0, 32));
 					ALU_data <= ALU_result;
 				END IF;
 			ELSIF (falling_edge(clock)) THEN

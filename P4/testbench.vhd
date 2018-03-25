@@ -122,6 +122,7 @@ ARCHITECTURE behaviour OF testbench IS
 
 			);
 		END COMPONENT;
+
 		COMPONENT WB IS
 			PORT (
 				clk : IN std_logic;
