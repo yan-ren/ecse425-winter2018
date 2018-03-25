@@ -59,7 +59,7 @@ ARCHITECTURE behaviour OF testbench IS
 			clk : IN std_logic;
 
 			-- from id stage
-			instruction_addr_in : IN std_logic_vector(31 DOWNTO 0);
+			instruction_addr : IN std_logic_vector(31 DOWNTO 0);
 			jump_addr : IN std_logic_vector(25 DOWNTO 0); -- changed from 31 dwonto 0 to 25 down to 0
 			rs : IN std_logic_vector(31 DOWNTO 0);
 			rt : IN std_logic_vector(31 DOWNTO 0);
@@ -241,7 +241,7 @@ ARCHITECTURE behaviour OF testbench IS
 						PORT MAP(
 							clk => clock,
 							bran_taken_in => s_branch_taken,
-							instruction_addr_in => inst_addr_from_id,
+							instruction_addr => inst_addr_from_id,
 							jump_addr => jump_addr,
 							rs => rs,
 							rt => rt,
