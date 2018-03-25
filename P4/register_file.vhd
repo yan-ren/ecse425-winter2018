@@ -29,7 +29,7 @@ ARCHITECTURE Behav OF register_file IS
 	SIGNAL register_store : registers := (OTHERS => "00000000000000000000000000000000"); -- initialize all registers to 32 bits of 0.
 
 BEGIN
-	PROCESS (clock)
+	PROCESS
 	BEGIN
 		IF (clock'event) THEN
 			IF (unsigned(rs)) = "00000" THEN --register $0 is wired to 0x0000

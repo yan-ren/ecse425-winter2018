@@ -1,0 +1,62 @@
+C:/Users/Administrator.USER-20150914NM/Desktop/Project4/DataMem.vhd {1 {vcom -work work -2002 -explicit -stats=none C:/Users/Administrator.USER-20150914NM/Desktop/Project4/DataMem.vhd
+Model Technology ModelSim - Intel FPGA Edition vcom 10.5b Compiler 2016.10 Oct  5 2016
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Loading package std_logic_textio
+-- Compiling entity DataMem
+-- Compiling architecture behavior of DataMem
+
+} {} {}} C:/Users/Administrator.USER-20150914NM/Desktop/Project4/WB.vhd {1 {vcom -work work -2002 -explicit -stats=none C:/Users/Administrator.USER-20150914NM/Desktop/Project4/WB.vhd
+Model Technology ModelSim - Intel FPGA Edition vcom 10.5b Compiler 2016.10 Oct  5 2016
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Compiling entity WB
+-- Compiling architecture behaviour of WB
+
+} {} {}} C:/Users/Administrator.USER-20150914NM/Desktop/Project4/EX.vhd {1 {vcom -work work -2002 -explicit -stats=none C:/Users/Administrator.USER-20150914NM/Desktop/Project4/EX.vhd
+Model Technology ModelSim - Intel FPGA Edition vcom 10.5b Compiler 2016.10 Oct  5 2016
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Loading package std_logic_arith
+-- Loading package STD_LOGIC_UNSIGNED
+-- Compiling entity EX
+-- Compiling architecture behaviour of EX
+
+} {} {}} C:/Users/Administrator.USER-20150914NM/Desktop/Project4/IDnBuffer.vhd {1 {vcom -work work -2002 -explicit -stats=none C:/Users/Administrator.USER-20150914NM/Desktop/Project4/IDnBuffer.vhd
+Model Technology ModelSim - Intel FPGA Edition vcom 10.5b Compiler 2016.10 Oct  5 2016
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Loading package std_logic_textio
+-- Loading package std_logic_arith
+-- Loading package STD_LOGIC_UNSIGNED
+-- Compiling entity ID
+-- Compiling architecture behaviour of ID
+
+} {} {}} C:/Users/Administrator.USER-20150914NM/Desktop/Project4/ifprocess.vhd {1 {vcom -work work -2002 -explicit -stats=none C:/Users/Administrator.USER-20150914NM/Desktop/Project4/ifprocess.vhd
+Model Technology ModelSim - Intel FPGA Edition vcom 10.5b Compiler 2016.10 Oct  5 2016
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Loading package std_logic_textio
+-- Compiling entity ifprocess
+-- Compiling architecture behavioral of ifprocess
+
+} {} {}} C:/Users/Administrator.USER-20150914NM/Desktop/Project4/testbench.vhd {1 {vcom -work work -2002 -explicit -stats=none C:/Users/Administrator.USER-20150914NM/Desktop/Project4/testbench.vhd
+Model Technology ModelSim - Intel FPGA Edition vcom 10.5b Compiler 2016.10 Oct  5 2016
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Compiling entity testbench
+-- Compiling architecture behaviour of testbench
+
+} {} {}}
