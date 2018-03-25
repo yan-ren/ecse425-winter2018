@@ -4,8 +4,8 @@ proc AddWaves {} {
 	add wave -position end sim:/testbench/programend
 	add wave -position end sim:/testbench/readfinish
 	add wave -position end sim:/testbench/insert_stall
-	add wave -position end sim:/testbench/branch_addr
-	add wave -position end sim:/testbench/branch_taken
+	add wave -position end sim:/testbench/s_branch_addr
+	add wave -position end sim:/testbench/s_branch_taken
 	add wave -position end sim:/testbench/inst_addr
 	add wave -position end sim:/testbench/inst
 	add wave -position end sim:/testbench/writeback_register_address

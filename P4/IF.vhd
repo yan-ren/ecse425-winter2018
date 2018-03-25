@@ -12,8 +12,8 @@ ENTITY IF_STAGE IS
 		clock: IN STD_LOGIC;
 		reset: in std_logic := '0';
 		insert_stall: in std_logic := '0';
-		BranchAddr: IN STD_LOGIC_VECTOR (31 DOWNTO 0);
-		Branch_taken: IN STD_LOGIC := '0';
+		branch_addr: IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+		branch_taken: IN STD_LOGIC := '0';
 		next_addr: OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
 		inst: out std_logic_vector(31 downto 0);
     readfinish : in std_logic := '0'
@@ -53,10 +53,10 @@ begin
     	max_inst <= counter - 4;
 	end process;
 
-  process (pc_plus4, Branch_taken)
+  process (pc_plus4, branch_taken)
     begin
-    	if(Branch_taken = '1') and (insert_stall = '0')then
-				pc <= BranchAddr;
+    	if(branch_taken = '1') and (insert_stall = '0')then
+				pc <= branch_addr;
 			elsif  (insert_stall = '0') then
 				pc <= pc_plus4;
       end if;

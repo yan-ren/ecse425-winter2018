@@ -16,8 +16,8 @@ ARCHITECTURE behaviour OF testbench IS
 			clock : IN std_logic;
 			reset : IN std_logic := '0';
 			insert_stall : IN std_logic := '0';
-			BranchAddr : IN std_logic_vector (31 DOWNTO 0);
-			Branch_taken : IN std_logic := '0';
+			branch_addr : IN std_logic_vector (31 DOWNTO 0);
+			branch_taken : IN std_logic := '0';
 			next_addr : OUT std_logic_vector (31 DOWNTO 0);
 			inst : OUT std_logic_vector (31 DOWNTO 0);
 			readfinish : IN std_logic := '0'
@@ -146,8 +146,8 @@ ARCHITECTURE behaviour OF testbench IS
 		-- signal into if
 		SIGNAL reset : std_logic;
 		SIGNAL insert_stall : std_logic := '0';
-		SIGNAL branch_addr : std_logic_vector (31 DOWNTO 0) := (OTHERS => '0');
-		SIGNAL branch_taken : std_logic := '0';
+		SIGNAL s_branch_addr : std_logic_vector (31 DOWNTO 0) := (OTHERS => '0');
+		SIGNAL s_branch_taken : std_logic := '0';
 		-- signal into id
 		SIGNAL inst_addr : std_logic_vector (31 DOWNTO 0) := (OTHERS => '0');
 		SIGNAL inst : std_logic_vector (31 DOWNTO 0) := (OTHERS => '0');
@@ -202,8 +202,8 @@ ARCHITECTURE behaviour OF testbench IS
 				clock => clock,
 				reset => reset,
 				insert_stall => insert_stall,
-				BranchAddr => branch_addr,
-				Branch_taken => branch_taken,
+				branch_addr => s_branch_addr,
+				branch_taken => s_branch_taken,
 				next_addr => inst_addr,
 				inst => inst,
 				readfinish => readfinish
@@ -215,7 +215,7 @@ ARCHITECTURE behaviour OF testbench IS
 					)
 					PORT MAP(
 						clk => clock,
-						bran_taken_in => branch_taken,
+						bran_taken_in => s_branch_taken,
 						IR_addr => inst_addr,
 						IR => inst,
 						writeback_register_address => writeback_register_address,
@@ -240,7 +240,7 @@ ARCHITECTURE behaviour OF testbench IS
 						execute : EX
 						PORT MAP(
 							clk => clock,
-							bran_taken_in => branch_taken,
+							bran_taken_in => s_branch_taken,
 							instruction_addr_in => inst_addr_from_id,
 							jump_addr => jump_addr,
 							rs => rs,
@@ -283,8 +283,8 @@ ARCHITECTURE behaviour OF testbench IS
 			mem_data => memory_data,
 			ALU_data => ALU_result_from_mem,
 			dest_addr_out => des_addr_from_mem,
-			bran_addr => branch_addr,
-			bran_taken_out => branch_taken
+			bran_addr => s_branch_addr,
+			bran_taken_out => s_branch_taken
 		);
 
 		writeback : WB

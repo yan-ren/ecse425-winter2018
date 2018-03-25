@@ -27,7 +27,7 @@ ENTITY ID IS
 		insert_stall : OUT std_logic;
 		EX_control_buffer : OUT std_logic_vector(10 DOWNTO 0); -- for ex stage provide information for forward and harzard detect, first bit for mem_read, 9-5 for rt, 4-0 for rs
 		MEM_control_buffer : OUT std_logic_vector(5 DOWNTO 0); -- for mem stage, provide info for forward and hazard detect, first bit for wb_signal, 4-0 for des_adr
-		WB_control_buffer : OUT std_logic_vector(5 DOWNTO 0); -- for mem stage, provide info for forward and hazard detect, first bit for wb_signal, 4-0 for des_adr
+		WB_control_buffer : OUT std_logic_vector(5 DOWNTO 0); -- for wb stage, provide info for forward and hazard detect, first bit for wb_signal, 4-0 for des_adr
 		funct : OUT std_logic_vector(5 DOWNTO 0);
 		opcode : OUT std_logic_vector(5 DOWNTO 0);
 		write_enable : IN std_logic := '0' -- indicate program ends
@@ -35,9 +35,27 @@ ENTITY ID IS
 END ID;
 
 ARCHITECTURE behaviour OF ID IS
+	COMPONENT register_file IS
+		GENERIC (
+			register_size : INTEGER := 32 --MIPS register size is 32 bit
+		);
+
+		PORT (
+			clock : IN STD_LOGIC;
+			rs : IN STD_LOGIC_VECTOR (4 DOWNTO 0); -- first source register
+			rt : IN STD_LOGIC_VECTOR (4 DOWNTO 0); -- second source register
+			write_enable : IN STD_LOGIC; -- signals that rd_data may be written into rd
+			rd : IN STD_LOGIC_VECTOR (4 DOWNTO 0); -- destination register
+			rd_data : IN STD_LOGIC_VECTOR (31 DOWNTO 0); -- destination register data
+			writeToText : IN STD_LOGIC := '0';
+
+			rs_data : OUT STD_LOGIC_VECTOR (31 DOWNTO 0); -- data of register rs
+			rt_data : OUT STD_LOGIC_VECTOR (31 DOWNTO 0) -- data of register rt
+		);
+	END COMPONENT;
 
 	TYPE registerarray IS ARRAY(register_size - 1 DOWNTO 0) OF std_logic_vector(31 DOWNTO 0);
-	SIGNAL register_block : registerarray;
+	SIGNAL register_block : registerarray := (OTHERS => "00000000000000000000000000000000"); -- initialize all registers to 32 bits of 0.
 	SIGNAL s_rs_address : std_logic_vector(4 DOWNTO 0) := "00000";
 	SIGNAL s_rt_address : std_logic_vector(4 DOWNTO 0) := "00000";
 	SIGNAL s_immediate : std_logic_vector(15 DOWNTO 0) := "0000000000000000";
@@ -48,6 +66,7 @@ ARCHITECTURE behaviour OF ID IS
 	SIGNAL s_MEM_control_buffer : std_logic_vector(5 DOWNTO 0);
 	SIGNAL s_WB_control_buffer : std_logic_vector(5 DOWNTO 0);
 	SIGNAL s_hazard_detect : std_logic := '0';
+	SIGNAL s_write_enable: std_logic := '0';
 
 BEGIN
 	s_opcode <= IR(31 DOWNTO 26);
@@ -67,27 +86,21 @@ BEGIN
 			IF (ex_state_buffer(9 DOWNTO 5) = s_rs_address OR ex_state_buffer(4 DOWNTO 0) = s_rt_address) THEN
 				s_hazard_detect <= '1';
 			END IF;
-		ELSE
 		END IF;
-
 	END PROCESS;
 
 	-- write back process
 	wb_process : PROCESS (clk, writeback_register_address, writeback_register_content)
 	BEGIN
-		-- initialize the register
-		IF (now < 1 ps) THEN
-			REPORT "initial the REGISTER";
-			FOR i IN 0 TO register_size - 1 LOOP
-				register_block(i) <= std_logic_vector(to_unsigned(0, 32));
-
-			END LOOP;
-		END IF;
 		-- write back the data to register
 		IF (writeback_register_address /= "00000" AND now > 4 ns) THEN
 			REPORT "write back called ";
 			register_block(to_integer(unsigned(writeback_register_address))) <= writeback_register_content;
+			s_write_enable <= '1';
+		else
+			s_write_enable <= '0';
 		END IF;
+
 	END PROCESS;
 
 	reg_process : PROCESS (clk)
@@ -239,26 +252,19 @@ BEGIN
 	MEM_control_buffer <= s_MEM_control_buffer;
 
 	write_file_process : PROCESS (write_enable)
-		FILE registerfile : text;
-		VARIABLE line_num : line;
-		VARIABLE fstatus : file_open_status;
-		VARIABLE reg_value : std_logic_vector(31 DOWNTO 0);
+	FILE register_file : text OPEN write_mode IS "register_file.txt";
+	VARIABLE outLine : line;
+	VARIABLE rowLine : INTEGER := 0;
 	BEGIN
 		-- when the program ends
 		IF (write_enable = '1') THEN
 			REPORT "Start writing the REGISTER FILE";
-			file_open(fstatus, registerfile, "register_file.txt", WRITE_MODE);
-			-- register_file.txt has 32 lines
-			-- convert each bit value of reg_value to character for writing
-			FOR i IN 0 TO 31 LOOP
-				reg_value := register_block(i);
-				--write the line
-				write(line_num, reg_value);
-				--write the contents into txt file
-				writeline(registerfile, line_num);
+			WHILE (rowLine < 32) LOOP
+				write(outLine, register_block(rowLine));
+				writeline(register_file, outLine);
+				rowLine := rowLine + 1;
 			END LOOP;
-			file_close(registerfile);
-			REPORT "Finish outputing the REGISTER FILE";
+			REPORT "Finish writting the REGISTER FILE";
 		END IF;
 	END PROCESS;
 
