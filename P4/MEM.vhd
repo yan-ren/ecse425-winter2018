@@ -19,16 +19,19 @@ port(
 	-- inputs
 	clock : in std_logic;
 	stall_in : in std_logic;
-	instr : in std_logic_vector(31 downto 0);
+	instr_in : in std_logic_vector(31 downto 0);
 	ALU_in1 : in std_logic_vector(31 downto 0);
 	ALU_in2 : in std_logic_vector(31 downto 0);
 	immediate: in std_logic_vector(31 downto 0);
+	write_to_txt: in integer;
 	
 	-- outputs
 	stall_out : out std_logic;
-	lw_data : out std_logic_vector(31 downto 0);
+	MEM_out1 : out std_logic_vector(31 downto 0);
+	MEM_out2 : out std_logic_vector(31 downto 0);
+	instr_out : out std_logic_vector(31 downto 0);
 	
-	-- for test pruposes
+	-- for test purposes
 	i : out integer
 );
 end MEM;
@@ -45,11 +48,11 @@ architecture arch of MEM is
 	type hilo_reg is array(1 downto 0) of std_logic_vector(reg_size-1 downto 0);
 	signal hilo: hilo_reg;
 	
-	
+	signal instr : std_logic_vector(31 downto 0);
 	
 begin	
 	-- Processes the instruction
-	MEM_process : process(clock, stall_in)
+	MEM_process : process(clock, stall_in, write_to_txt)
 	-- variables needed during the MEM_process
 	variable opcode : std_logic_vector(5 downto 0);
 	variable funct : std_logic_vector(5 downto 0);
@@ -60,6 +63,7 @@ begin
 	variable cur_line : line;
 	
 	begin
+		instr <= instr_in;
 		opcode := instr(31 downto 26);
 		funct := instr(5 downto 0);
 		dest_reg := instr(20 downto 16);
@@ -73,7 +77,7 @@ begin
 		end if;
 		
 		-- Write to txt
-		if(now > 10000*clock_period) then
+		if(write_to_txt = 1 or now > 10000*clock_period) then
 		file_open(file_MEM, "memory.txt", write_mode);
 			for i in 0 to ram_size-1 loop
 				write(cur_line, ram_block(i), right, reg_size);
@@ -93,15 +97,25 @@ begin
 					-- LW Ry, offset(Rx)
 					if(opcode = "100011") then
 						-- Ry required data <= memory[ALU_in1 = Rx data + offset]
-						lw_data <= ram_block(to_integer(unsigned(ALU_in1)));
+						MEM_out1 <= ram_block(to_integer(unsigned(ALU_in1)));
+						MEM_out2 <= ALU_in2;
 						i <= to_integer(unsigned(ALU_in1));
 					
 					-- SW Ry, offset(Rx)
 					elsif(opcode = "101011") then
 						-- memory[ALU_in1 = Rx data + offset] <= Ry data
 						ram_block(to_integer(unsigned(ALU_in2))) <= ALU_in1;
+						MEM_out1 <= ALU_in1;
+						MEM_out2 <= ALU_in2;
 						i <= to_integer(unsigned(ALU_in2));
+						
+					-- MEM not required
+					else
+						MEM_out1 <= ALU_in1;
+						MEM_out2 <= ALU_in2;
 					end if;
+					
+					instr_out <= instr;
 					
 			end if;
 		end if;

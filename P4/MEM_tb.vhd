@@ -19,14 +19,17 @@ port(
 	-- inputs
 	clock : in std_logic;
 	stall_in : in std_logic;
-	instr : in std_logic_vector(31 downto 0);
+	instr_in : in std_logic_vector(31 downto 0);
 	ALU_in1 : in std_logic_vector(31 downto 0);
 	ALU_in2 : in std_logic_vector(31 downto 0);
 	immediate: in std_logic_vector(31 downto 0);
+	write_to_txt: in integer;
 	
 	-- outputs
 	stall_out : out std_logic;
-	lw_data : out std_logic_vector(31 downto 0);
+	MEM_out1 : out std_logic_vector(31 downto 0);
+	MEM_out2 : out std_logic_vector(31 downto 0);
+	instr_out : out std_logic_vector(31 downto 0);
 	
 	-- for test pruposes
 	i : out integer
@@ -37,15 +40,21 @@ end component;
 -- inputs
 signal clock : std_logic;
 signal stall_in : std_logic;
-signal instr : std_logic_vector(31 downto 0);
+signal instr_in : std_logic_vector(31 downto 0);
 signal ALU_in1 : std_logic_vector(31 downto 0);
 signal ALU_in2 : std_logic_vector(31 downto 0);
 signal immediate: std_logic_vector(31 downto 0);
+signal write_to_txt: integer;
 
 -- outputs
 signal stall_out : std_logic;
-signal lw_data : std_logic_vector(31 downto 0);
+signal MEM_out1 : std_logic_vector(31 downto 0);
+signal MEM_out2 : std_logic_vector(31 downto 0);
+signal instr_out : std_logic_vector(31 downto 0);
+
+-- for test purposess
 signal i : integer;
+
 
 constant clock_period : time := 1 ns;
 
@@ -55,12 +64,15 @@ mem_comp: MEM
 port map (
 	clock => clock,
 	stall_in => stall_in,
-	instr => instr,
+	instr_in => instr_in,
 	ALU_in1 => ALU_in1,
 	ALU_in2 => ALU_in2,
 	immediate => immediate,
+	write_to_txt => write_to_txt,
 	stall_out => stall_out,
-	lw_data => lw_data,
+	MEM_out1 => MEM_out1,
+	MEM_out2 => MEM_out2,
+	instr_out => instr_out,
 	i => i
 );
 
@@ -75,8 +87,6 @@ end process;
 test_process: process
 begin
 	
-	wait for 10*clock_period;
-	
 	-- stall
 	stall_in <= '1';
 	wait for 1*clock_period;
@@ -84,29 +94,33 @@ begin
 	wait for 1*clock_period;
 	
 	--SW
-	instr <= "10101100000000000000000000000000"; -- SW R0, 0(R0)
+	instr_in <= "10101100000000000000000000000000"; -- SW R0, 0(R0)
 	ALU_in2 <= "00000000000000000000000000000001";
 	ALU_in1 <= "11111100000000000000000000000000";
 	wait for 1*clock_period;
 	
 	--LW
-	instr <= "10001100000000000000000000000000"; -- LW R0, 0(R0)
+	instr_in <= "10001100000000000000000000000000"; -- LW R0, 0(R0)
 	ALU_in1 <= "00000000000000000000000000000000";
 	wait for 1*clock_period;
 	
 	--LW
-	instr <= "10001100000000000000000000000000"; -- LW R0, 0(R0)
+	instr_in <= "10001100000000000000000000000000"; -- LW R0, 0(R0)
 	ALU_in1 <= "00000000000000000000000000000001";
 	wait for 1*clock_period;
 	
 	--LW
-	instr <= "10001100000000000000000000000000"; -- LW R0, 0(R0)
+	instr_in <= "10001100000000000000000000000000"; -- LW R0, 0(R0)
 	ALU_in1 <= "00000000000000000000000000000010";
 	wait for 1*clock_period;
 	
 	--LW
-	instr <= "10001100000000000000000000000000"; -- LW R0, 0(R0)
+	instr_in <= "10001100000000000000000000000000"; -- LW R0, 0(R0)
 	ALU_in1 <= "00000000000000000000000000000011";
+	wait for 1*clock_period;
+	
+	--write to text
+	write_to_txt <= 1;
 	wait for 1*clock_period;
 	
 end process;

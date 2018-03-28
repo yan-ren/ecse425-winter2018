@@ -28,7 +28,7 @@ port(
 	load_to_reg : out std_logic_vector(31 downto 0);
 	instr_out : out std_logic_vector(31 downto 0)
 	
-	-- for test pruposes
+	-- for test purposes
 	
 );
 end WB;
