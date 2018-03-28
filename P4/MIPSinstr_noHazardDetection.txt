@@ -1,0 +1,51 @@
+## Given textbench in instruction
+#Fact:	addi $1, $0, 5
+#		addi $2, $0, 1
+#Loop:	slti $3, $1, 2
+#		bne  $3, $0, Skip
+#		mult $1, $2
+#		mflo $2
+#		addi $1, $1, -1
+#		j Loop
+#Skip:	jr $31
+
+## Actual testbench
+# Initialize everything to their register number
+
+Init:	addi	$1, $0, 1		# R1 = 1
+		addi	$2, $0, 2		# R2 = 2
+		add		$3, $1, $2		# R3 = R2 + R1 = 3
+		mult	$2, $3			# R6 = R2 * R3 = 6
+		mflo	$6
+		sub		$5, $6, $1		# R5 = R6 - R1 = 5
+		div		$6, $5			# R4 = R6%R5 = 4
+		mfhi	$4
+		
+		sw		$2, 4($0)		# M[0] = 2
+		lw		$7, 0($0)		# R7 = 2 + 5 = 7
+		addi	$7, $7, 5
+		
+		lui		$8, 4097		# R8 = 0x10010000 & 16x0
+		beq		$0, $0, One		# Always true, branch to One
+
+Four:	jr		$31				# go to after jal
+
+Two:	or		$10, $0, $1		# R10 = 1
+		nor		$11, $0, $1		# R11 = 0
+		xor		$12, $1, $1		# R12 = 0
+		andi	$13, $0, 1		# R13 = 0
+		ori		$14, $0, 1		# R14 = 1
+		xori	$15, $0, 1		# R15 = 0
+		j		Three
+
+One:	and		$9, $0, $1		# R9 = 0
+		bne		$9, $1, Two		# Should be false, branch to two
+		
+Three:	jal		Four			# jr returns after here
+		slt		$16, $0, $1		# R16 = 1
+		slti	$17, $5, $2		# R17 = 1
+		sll		$18, $1, 0		# R18 = 1, should have no effect
+		srl		$19, $8, 1		# R18 = 0 & 0x10010000 & 15x0
+		sra		$20, $8, 1		# R19 = 1 & 0x10010000 & 15x0
+		
+		

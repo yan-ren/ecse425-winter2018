@@ -1,0 +1,63 @@
+## Given textbench in instruction
+#Fact:	addi $1, $0, 5
+#		addi $2, $0, 1
+#Loop:	slti $3, $1, 2
+#		bne  $3, $0, Skip
+#		mult $1, $2
+#		mflo $2
+#		addi $1, $1, -1
+#		j Loop
+#Skip:	jr $31
+
+## Actual testbench
+# Initialize everything to their register number
+
+Init:	addi	$1, $0, 1		# R1 = 1
+		addi	$2, $0, 2		# R2 = 2
+		add		$0, $0, $0		# Hazard Detection
+		add		$0, $0, $0		# Hazard Detection
+		add		$0, $0, $0		# Hazard Detection
+		add		$0, $0, $0		# Hazard Detection
+		add		$0, $0, $0		# Hazard Detection
+		add		$3, $1, $2		# R3 = R2 + R1 = 3
+		add		$0, $0, $0		# Hazard Detection
+		add		$0, $0, $0		# Hazard Detection
+		add		$0, $0, $0		# Hazard Detection
+		add		$0, $0, $0		# Hazard Detection
+		add		$0, $0, $0		# Hazard Detection
+		mult	$2, $3			# R6 = R2 * R3 = 6
+		mflo	$6
+		add		$0, $0, $0		# Hazard Detection
+		add		$0, $0, $0		# Hazard Detection
+		add		$0, $0, $0		# Hazard Detection
+		add		$0, $0, $0		# Hazard Detection
+		add		$0, $0, $0		# Hazard Detection
+		sub		$5, $6, $1		# R5 = R6 - R1 = 5
+		add		$0, $0, $0		# Hazard Detection
+		add		$0, $0, $0		# Hazard Detection
+		add		$0, $0, $0		# Hazard Detection
+		add		$0, $0, $0		# Hazard Detection
+		add		$0, $0, $0		# Hazard Detection
+		div		$6, $5			# R4 = R6%R5 = 4
+		mfhi	$4
+		
+		sw		$2, 4($0)		# M[0] = 2
+		add		$0, $0, $0		# Hazard Detection
+		add		$0, $0, $0		# Hazard Detection
+		add		$0, $0, $0		# Hazard Detection
+		add		$0, $0, $0		# Hazard Detection
+		add		$0, $0, $0		# Hazard Detection
+		lw		$7, 0($0)		# R7 = 2 + 5 = 7
+		add		$0, $0, $0		# Hazard Detection
+		add		$0, $0, $0		# Hazard Detection
+		add		$0, $0, $0		# Hazard Detection
+		add		$0, $0, $0		# Hazard Detection
+		add		$0, $0, $0		# Hazard Detection
+		addi	$7, $7, 5
+		
+		lui		$8, 4097		# R8 = 0x10010000 & 16x0
+		beq		$0, $0, One		# Always true, branch to One
+
+Two:	or		$10, $0, $1		# R10 = 1
+
+One:	and		$9, $0, $1		# R9 = 0
