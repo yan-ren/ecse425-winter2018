@@ -112,7 +112,7 @@ ALU_control_process : process(opcode, funct,rs,rt,pc_plus_4,signExtImm,jump_addr
 
 					--jr
 					when "001000" =>
-						output<=(others => '0');
+						
 						temp_branch_addr <= rs;
               					temp_bran_taken <= '1';
 
