@@ -14,7 +14,7 @@ entity EX is
 	result: out std_logic_vector(31 downto 0);
 	des_addr_in : in std_logic_vector(4 DOWNTO 0);
 	des_addr_out : OUT std_logic_vector(4 DOWNTO 0);
-	bran_taken: out std_logic;
+	bran_taken: out std_logic:= '0';
 	jump_addr : in std_logic_vector(25 DOWNTO 0);
 	branch_addr: out std_logic_vector(31 downto 0)
 	--zero: out std_logic := '0'

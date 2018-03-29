@@ -207,4 +207,4 @@ ALU_control_process : process(opcode, funct,rs,rt,pc_plus_4,signExtImm,jump_addr
 	end process;
 
 
-end behaviour;
+end behavioral;
