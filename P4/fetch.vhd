@@ -7,134 +7,86 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use STD.textio.all;
+use ieee.std_logic_textio.all;
 
 entity fetch is
 generic(
-	ram_size : INTEGER := 32768
+	ram_size : INTEGER := 4096
 );
 port(
 	clock : in std_logic;
-	reset : in std_logic;
 	
 	-- Avalon interface --
 	branch_address : in std_logic_vector (31 downto 0);
 	branch_taken : in std_logic;
 	
 	PC_mux : out std_logic_vector (31 downto 0);
-	IR : out std_logic_vector (31 downto 0);
-	test_vector : out std_logic_vector (31 downto 0);
-	state_number: out integer;
-	waitrequest : out std_logic
+	IR : out std_logic_vector (31 downto 0)
 );
 end fetch;
 
 architecture arch of fetch is
-
--- states of our FSM
---type state_type is (RESET_FETCH, INSTRUCTION_FETCH, WAIT_STATE);
 
 -- declare signals here
 --signals that work with cache and memory
 signal clk : std_logic := '0';
 constant clk_period : time := 1 ns;
 
-signal m_addr : integer range 0 to 2147483647;
-signal m_read : std_logic;
-signal m_readdata : std_logic_vector (31 downto 0);
-signal m_write : std_logic;
-signal m_writedata : std_logic_vector (31 downto 0);
-signal m_waitrequest : std_logic;
 
 --signals that work with fetch 
---signal state: state_type;
-
+file file_instruction : text;
 signal PC : STD_LOGIC_VECTOR (31 downto 0);
-signal PC_new : STD_LOGIC_VECTOR (31 downto 0);
-signal PC_add : STD_LOGIC_VECTOR (31 downto 0);
 signal i : INTEGER;
-signal statenum : integer;
+signal j : INTEGER;
+TYPE MEM IS ARRAY(ram_size-1 downto 0) OF STD_LOGIC_VECTOR(31 DOWNTO 0);
+	SIGNAL instruct_block: MEM;
 
 begin
+IF_process: process(clock)
 
--- Connect the components which we instantiated above to their
--- respective signals.
+     variable line : line;
 
-MEM : entity work.memory_instruction
-GENERIC MAP(
-            ram_size => 1024
-)
-port map (
-    clock => clock,
-    writedata => m_writedata,
-    address => m_addr,
-    memwrite => m_write,
-    memread => m_read,
-    readdata => m_readdata,
-    waitrequest => m_waitrequest
-);
-
-cache_FSM_do: process(clock, reset)
-	variable index: INTEGER;
-
+    variable instruct : std_logic_vector(31 downto 0);
 begin
+  
     IF(now < 1 ps)THEN
-			PC <= "00000000000000000000000000000000";	
-		  state_number <= m_addr;
-		  m_read <= '0';
-		  m_addr <= to_integer(unsigned(PC));
-		  PC_new <= std_logic_vector(to_unsigned(to_integer(unsigned(PC))+4, 32));
-		  m_read <= '1';
-		  test_vector <= PC;
+    
+			file_open(file_instruction, "program.txt",  read_mode);
+      
+       For j in 0 to ram_size-1 LOOP
+          if (endfile(file_instruction)) then
+            exit;
+          end if;
+         
+          readline(file_instruction, line);
+          read(line, instruct);
+				  instruct_block(j) <= instruct;
+			 END LOOP;
+			 
+		  file_close(file_instruction);
+		  
+		  PC <= "00000000000000000000000000000000";	
 		end if;
+	
 	if (rising_edge(clock)) THEN -- If not reset, do...
 	  
-                 m_addr <= to_integer(unsigned(PC));
-				         PC_MUX <= PC_new;
-    	            PC <= PC_new;
-    	            
-	               PC_new <= std_logic_vector(to_unsigned(to_integer(unsigned(PC))+4, 32));
-                 state_number <= m_addr;
-                 test_vector <= PC;
-	      
-	             --if branch is taken,
+               --IR is the instruction later sent to the decode stage
+               IR <= instruct_block(to_integer(unsigned(PC)));
+                 
+	             --if branch is taken, puts branch address into PC_MUX and PC
 	             if(branch_taken = '1') then
-	                test_vector <= PC;
-            
-      	           state_number <= m_addr;
-      	           --IR <= m_readdata;
 				          --branch_taken = '0';
-				          PC_new <= branch_address;
-				          PC_MUX <= PC_new; 
-				          PC <= PC_new; 
-				          
-				          m_addr <= to_integer(unsigned(PC));
-				          test_vector <= PC;
-      	           state_number <= m_addr;
-      	           
-				        elsif ( branch_taken = '0') then
-				          test_vector <= PC;
-      	           state_number <= m_addr;
-      	           
-                
-				          
-				          state_number <= m_addr;
-				          test_vector <= PC;
-				         end if;
-				  
-    	            IR <= m_readdata;
-	               
-                 test_vector <= PC;
-  	              state_number <= m_addr;
-  	              
-                
-        
+				          PC_MUX <= branch_address; 
+				          PC <= branch_address; 
+				         
+				       --if branch is not taken, puts PC+4 into PC_MUX and PC 
+				       elsif ( branch_taken = '0') then
+      	           PC_MUX <= std_logic_vector(to_unsigned(to_integer(unsigned(PC))+1, 32));
+    	             PC <= std_logic_vector(to_unsigned(to_integer(unsigned(PC))+1, 32));
+    	             
+				       end if;
 	     
-	end if;			
+	end if;	
 end process;	
 end arch;
-
-
-
-
-
-
