@@ -88,6 +88,18 @@ BEGIN
 		opcode <= "000000";
 		funct <= "100010";
 		wait for clock_period;
+			
+	        --SLT
+		IR_addr_out <= "00000000000000000000000000000000";
+		signExtImm <= "00000000000000000000000000000000";
+		des_addr_in <= "00000";
+		bran_taken <='0';
+		rs <= "00000000000000000000000000000001";
+		rt <= "00000000000000000000000000000000";
+		opcode <= "000000";
+		funct <= "101010";
+		wait for clock_period;
+	
 
 		
 		WAIT;
