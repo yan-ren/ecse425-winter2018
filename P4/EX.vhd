@@ -1,6 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use IEEE.std_logic_unsigned.all;
 
 entity EX is
   port(
@@ -15,12 +16,12 @@ entity EX is
 	des_addr_out : OUT std_logic_vector(4 DOWNTO 0);
 	bran_taken: out std_logic;
 	jump_addr : in std_logic_vector(25 DOWNTO 0);
-	branch_addr: out std_logic_vector(31 downto 0);
+	branch_addr: out std_logic_vector(31 downto 0)
 	--zero: out std_logic := '0'
   );
 end EX;
 
-architecture Behavioral of EX is
+architecture behavioral of EX is
 	signal hilo : std_logic_vector(63 downto 0);
 	signal hi : std_logic_vector(31 downto 0);
 	signal lo : std_logic_vector(31 downto 0);
@@ -206,4 +207,4 @@ ALU_control_process : process(opcode, funct,rs,rt,pc_plus_4,signExtImm,jump_addr
 	end process;
 
 
-end behaviour;
+end behavioral;
