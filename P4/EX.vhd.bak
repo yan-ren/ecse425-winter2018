@@ -5,17 +5,20 @@ use IEEE.std_logic_unsigned.all;
 
 entity EX is
   port(
+	clk : in std_logic;
 	IR_addr_out : in std_logic_vector(31 DOWNTO 0);
 	funct : in std_logic_vector(5 DOWNTO 0);
 	opcode : in std_logic_vector(5 DOWNTO 0);
 	rs: in std_logic_vector(31 downto 0);
 	rt: in std_logic_vector(31 downto 0);
+	rt_out:	out std_logic_vector(31 downto 0);
 	signExtImm : in std_logic_vector(31 DOWNTO 0);
 	result: out std_logic_vector(31 downto 0);
 	des_addr_in : in std_logic_vector(4 DOWNTO 0);
 	des_addr_out : OUT std_logic_vector(4 DOWNTO 0);
-	bran_taken: out std_logic;
+	bran_taken: out std_logic:= '0';
 	jump_addr : in std_logic_vector(25 DOWNTO 0);
+	sf : out std_logic_vector(63 downto 0);
 	branch_addr: out std_logic_vector(31 downto 0)
 	--zero: out std_logic := '0'
   );
@@ -38,9 +41,9 @@ begin
 pc_plus_4 <= std_logic_vector((unsigned(IR_addr_out))+ 4);
 
 
-ALU_control_process : process(opcode, funct,rs,rt,pc_plus_4,signExtImm,jump_addr)
+ALU_control_process : process(opcode, funct,rs,rt,pc_plus_4,signExtImm,jump_addr,clk,rt_out)
 	begin
-
+		if rising_edge(clk) then
 		case opcode is
 
 			-- R type instruction
@@ -61,6 +64,7 @@ ALU_control_process : process(opcode, funct,rs,rt,pc_plus_4,signExtImm,jump_addr
 						hilo <= std_logic_vector(signed(rs) * signed(rt)); --MUL change
 						hi<= hilo(63 downto 32);
  						lo<= hilo(31 downto 0);
+						output<=hi; 
 
 					-- div
 					when "011010" =>
@@ -203,7 +207,9 @@ ALU_control_process : process(opcode, funct,rs,rt,pc_plus_4,signExtImm,jump_addr
 		branch_addr <= temp_branch_addr;
 		result <= output;
 		des_addr_out<=des_addr_in;
-
+		rt_out<= rt;
+		sf<=hilo;
+end if;
 	end process;
 
 
