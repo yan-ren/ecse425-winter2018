@@ -23,7 +23,6 @@ component fetch is
   );
   port(
     clock : in std_logic;
-
 	  branch_address : in std_logic_vector (31 downto 0);
 	  branch_taken : in std_logic;
 	
@@ -63,7 +62,26 @@ component ID IS
 END component;
 
 -- EX stage
-	-- TODO
+component EX is
+port(
+	clk : in std_logic;
+	IR_addr_out : in std_logic_vector(31 DOWNTO 0);
+	funct : in std_logic_vector(5 DOWNTO 0);
+	opcode : in std_logic_vector(5 DOWNTO 0);
+	rs: in std_logic_vector(31 downto 0);
+	rt: in std_logic_vector(31 downto 0);
+	signExtImm : in std_logic_vector(31 DOWNTO 0);
+	des_addr_in : in std_logic_vector(4 DOWNTO 0);
+	jump_addr : in std_logic_vector(25 DOWNTO 0);
+	
+	result: out std_logic_vector(31 downto 0);
+	rt_out:	out std_logic_vector(31 downto 0);
+	des_addr_out : out std_logic_vector(4 DOWNTO 0);
+	bran_taken: out std_logic:= '0';
+	sf : out std_logic_vector(63 downto 0);
+	branch_addr: out std_logic_vector(31 downto 0)
+	);
+end component;
 
 -- MEM stage
 component MEM is
@@ -125,8 +143,8 @@ constant clock_period : time := 1 ns;
 
 	-- IF Stage
 signal next_address : std_logic_vector (31 downto 0);
-signal branch_address : std_logic_vector (31 downto 0);
-signal branch_taken : std_logic;
+--signal branch_address : std_logic_vector (31 downto 0);
+--signal branch_taken : std_logic;
 
 	-- ID Stage
 signal clk : std_logic;
@@ -150,6 +168,22 @@ signal funct : std_logic_vector(5 DOWNTO 0);
 signal opcode : std_logic_vector(5 DOWNTO 0);
 signal write_enable : std_logic := '0';
 
+  -- EX stage
+--signal IR_addr_out :  std_logic_vector(31 DOWNTO 0);
+--signal funct :  std_logic_vector(5 DOWNTO 0);
+--signal opcode :  std_logic_vector(5 DOWNTO 0);
+--signal rs:  std_logic_vector(31 downto 0);
+--signal rt:  std_logic_vector(31 downto 0);
+signal rt_out :  std_logic_vector(31 DOWNTO 0);
+--signal signExtImm :  std_logic_vector(31 DOWNTO 0);
+signal result:  std_logic_vector(31 downto 0);
+--signal des_addr_in :  std_logic_vector(4 DOWNTO 0);
+signal des_addr_out :  std_logic_vector(4 DOWNTO 0);
+signal bran_taken:std_logic:= '0';
+--signal jump_addr :  std_logic_vector(25 DOWNTO 0);
+signal sf : std_logic_vector(63 downto 0);
+signal branch_addr:  std_logic_vector(31 downto 0);
+	
 	-- MEM Stage
 signal clock_mem : std_logic;
 signal stall_in_mem : std_logic;
@@ -180,12 +214,12 @@ begin
 IF_ID: fetch
 port map(
   clock => clock,
-	branch_address => branch_address,
-	branch_taken => bran_taken_in,
+	branch_address => branch_addr,
+	branch_taken => bran_taken,
+	
 	next_address => next_address,
 	IR => IR
 );
-
 
 	-- ID/EX
 ID_EX: ID
@@ -212,8 +246,28 @@ port map(
 	opcode => opcode,
 	write_enable => write_enable
 );
+
 	-- EX/MEM
+EX_MEM : EX
+PORT MAP(
+	clk=>clock,
+	IR_addr_out => IR_addr_out,
+	funct => funct,
+	opcode => opcode,
+	rs=>rs,
+	rt=>rt,
+	signExtImm =>signExtImm,
+	des_addr_in => des_addr,
+	jump_addr => jump_addr,
 	
+	result=> result,
+	des_addr_out => des_addr_out,
+	bran_taken=> bran_taken,
+	sf=>sf,
+	rt_out=>rt_out,
+	branch_addr=>branch_addr
+);
+
 	-- MEM/WB
 mem_wb: WB
 port map(
@@ -228,8 +282,21 @@ port map(
 	load_to_reg => load_to_reg,
 	instr_out => instr_out_wb
 );
+
 	-- WB/ID
-	
+wb_comp: WB
+port map (
+	clock => clock,
+	stall_in => stall_in_wb,
+	instr_in => instr_out_mem,
+	MEM_in1 => MEM_in1,
+	MEM_in2 => MEM_in2,
+	immediate => immediate_wb,
+	stall_out => stall_out_wb,
+	reg_to_load => reg_to_load,
+	load_to_reg => load_to_reg,
+	instr_out => instr_out_wb
+);	
 	
 	next_address_t <= next_address;
 	IR_t <= IR;
