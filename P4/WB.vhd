@@ -10,9 +10,7 @@ entity WB is
               opcode : in std_logic_vector(5 downto 0);
               writeback_addr: in std_logic_vector(4 downto 0);
 	      WB_control_buffer: in std_logic_vector(5 downto 0);
-              -- for ex stage forward
 	      WB_control_buffer_out: out std_logic_vector(5 downto 0);
-	      -- for id stage
 	      writeback_data_out: out std_logic_vector(31 downto 0);
               writeback_addr_out: out std_logic_vector(4 downto 0)
               
@@ -36,3 +34,9 @@ begin
     end if;
 end process;
 end behaviour;
+
+
+
+
+--citation
+--https://github.com/klee-17/ECSE425-project/tree/master/deliverable4
