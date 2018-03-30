@@ -12,7 +12,7 @@ use ieee.std_logic_textio.all;
 
 entity fetch is
 generic(
-	ram_size : INTEGER := 4096
+	ram_size : INTEGER := 1024
 );
 port(
 	clock : in std_logic;
@@ -21,7 +21,7 @@ port(
 	branch_address : in std_logic_vector (31 downto 0);
 	branch_taken : in std_logic;
 	
-	PC_mux : out std_logic_vector (31 downto 0);
+	next_address : out std_logic_vector (31 downto 0);
 	IR : out std_logic_vector (31 downto 0)
 );
 end fetch;
@@ -77,12 +77,13 @@ begin
 	             --if branch is taken, puts branch address into PC_MUX and PC
 	             if(branch_taken = '1') then
 				          --branch_taken = '0';
-				          PC_MUX <= branch_address; 
+				          next_address <= branch_address; 
 				          PC <= branch_address; 
 				         
 				       --if branch is not taken, puts PC+4 into PC_MUX and PC 
 				       elsif ( branch_taken = '0') then
-      	           PC_MUX <= std_logic_vector(to_unsigned(to_integer(unsigned(PC))+1, 32));
+      	           next_address <= std_logic_vector(to_unsigned(to_integer(unsigned(PC))+1, 32));
+      	           
     	             PC <= std_logic_vector(to_unsigned(to_integer(unsigned(PC))+1, 32));
     	             
 				       end if;
