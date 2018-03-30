@@ -54,25 +54,35 @@ ALU_control_process : process(opcode, funct,rs,rt,pc_plus_4,signExtImm,jump_addr
 					-- add
 					when "100000" =>
 						output<= std_logic_vector(signed(rs) + signed(rt)); --ADD
+						temp_bran_taken <= '0';
 
 					-- sub
 					when "100010" =>
 						output<= std_logic_vector(signed(rs) - signed(rt)); --SUB
+						temp_bran_taken <= '0';
 
 					-- mult
 					when "011000" =>
 						hilo <= std_logic_vector(signed(rs) * signed(rt)); --MUL change
+						temp_bran_taken <= '0';
 						hi<= hilo(63 downto 32);
  						lo<= hilo(31 downto 0);
-						output<=hi; 
+						output<=hilo(31 downto 0); 
 
 					-- div
 					when "011010" =>
-						hilo <= std_logic_vector(signed(rs) mod signed(rt)) & std_logic_vector(signed(rs) / signed(rs));
-						hi<= hilo(63 downto 32);
- 						lo<= hilo(31 downto 0);
+						--hilo <= std_logic_vector(signed(rs) mod signed(rt)) & std_logic_vector(signed(rs) / signed(rs));
+						output <= std_logic_vector(signed(rs) / signed(rt));
+						lo<=output;
+						hi <= std_logic_vector(signed(rs) mod signed(rt));
+						temp_bran_taken <= '0';
+						--hi<= hilo(63 downto 32);
+ 						--lo<= hilo(31 downto 0);
+						--output<=lo;
+						
 					-- slt
 					when "101010" =>
+						temp_bran_taken <= '0';
 						if (signed(rs) < signed(rt)) then
 							output <= "00000000000000000000000000000001";
 						else
@@ -82,38 +92,47 @@ ALU_control_process : process(opcode, funct,rs,rt,pc_plus_4,signExtImm,jump_addr
 					-- and
 					when "100100" =>
 						output <= rs AND rt;
+						temp_bran_taken <= '0';
 
 					-- or
 					when "100101" =>
 						output <= rs OR rt;
+						temp_bran_taken <= '0';
 
 					-- nor
 					when "100111" =>
 						output <= rs NOR rt;
+						temp_bran_taken <= '0';
 
 					-- xor
 					when "100110" =>
 						output <= rs XOR rt;
+						temp_bran_taken <= '0';
 
 					-- mfhi
 					when "010000" =>
 						output <= hi;
+						temp_bran_taken <= '0';
 
 					-- mflo
 					when "010010" =>
 						output <= lo;
+						temp_bran_taken <= '0';
 
 					-- sll
 					when "000000" =>
 						output <= std_logic_vector(signed(rt) sll to_integer(signed(signExtImm(10 downto 6))));
+						temp_bran_taken <= '0';
 
 					-- srl
 					when "000010" =>
 						output <= std_logic_vector(signed(rt) srl to_integer(signed(signExtImm(10 downto 6))));
+						temp_bran_taken <= '0';
 
 					-- sra
 					when "000011" =>
 						output <= std_logic_vector(shift_right(signed(rt) , to_integer(signed(signExtImm(10 downto 6)))));
+						temp_bran_taken <= '0';
 
 					--jr
 					when "001000" =>
@@ -124,13 +143,14 @@ ALU_control_process : process(opcode, funct,rs,rt,pc_plus_4,signExtImm,jump_addr
 
 					when others =>
 						output <=(others => '0');
+						temp_bran_taken <= '0';
 
 				end case; 
 
 			-- I type
 			-- slti
 			when "001010" =>
-				
+				temp_bran_taken <= '0';
 				if (signed(rs) < signed(signExtImm)) then
 					output <= "00000000000000000000000000000001";
 				else
@@ -138,23 +158,28 @@ ALU_control_process : process(opcode, funct,rs,rt,pc_plus_4,signExtImm,jump_addr
 				end if;				
 			--ADDi
 			when "001000"  =>
+				temp_bran_taken <= '0';
                                 output<= std_logic_vector(signed(rs) + signed(signExtImm)); --ADD
 
 			-- andi
 			when "001100" =>
 				output <= rs AND signExtImm;
+				temp_bran_taken <= '0';
 
 			-- ori
 			when "001101" =>
 				output <= rs OR signExtImm;
+				temp_bran_taken <= '0';
 
 			-- xori
 			when "001110" =>
 				output <= rs XOR signExtImm;
+				temp_bran_taken <= '0';
 
 			-- lui
 			when "001111" =>
 				output <= to_stdlogicvector(to_bitvector(signExtImm) sll 16);
+				temp_bran_taken <= '0';
 
 			-- beq
 			when "000100" =>
@@ -190,10 +215,12 @@ ALU_control_process : process(opcode, funct,rs,rt,pc_plus_4,signExtImm,jump_addr
 			-- sw
 			when "101011" =>
 				output<= std_logic_vector(signed(rs) + signed(signExtImm)); 
+				temp_bran_taken <= '0';
 
 			-- lw
 			when "100011" =>
 				output<= std_logic_vector(signed(rs) + signed(signExtImm)); 
+				temp_bran_taken <= '0';
 
 			when others =>
 				output <=(others => '0');

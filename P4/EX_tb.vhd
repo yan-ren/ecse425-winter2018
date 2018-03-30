@@ -107,7 +107,19 @@ BEGIN
 		--wait for clock_period;
 		opcode <= "000000";
 		funct <= "011000";
-		wait for clock_period;
+		wait for 2*clock_period;
+
+		--DIV
+		IR_addr_out <= "00000000000000000000000000000000";
+		signExtImm <= "00000000000000000000000000000000";
+		des_addr_in <= "00000";
+		--bran_taken <='0';
+		rs <= "00000000000000000000000000000111";
+		rt <= "00000000000000000000000000000010";
+		--wait for clock_period;
+		opcode <= "000000";
+		funct <= "011010";
+		wait for 2*clock_period;
 
 
 		--mfhi
@@ -181,6 +193,18 @@ BEGIN
 		funct <= "000000";
 		wait for clock_period;
 
+		--sra
+		IR_addr_out <= "00000000000000000000000000000000";
+		signExtImm <= "00000000000000000000000000000000";
+		des_addr_in <= "00000";
+		--bran_taken <='0';
+		rs <= "00000000000000000000000000000001";
+		rt <= "00000000000000000000000000000001";
+		--wait for clock_period;
+		opcode <= "000000";
+		funct <= "000011";
+		wait for clock_period;
+
 
 		--j
 		IR_addr_out <= "00000000000000000000000000000000";
@@ -193,6 +217,45 @@ BEGIN
 		--wait for clock_period;
 		opcode <= "000010";
 		funct <= "000000";
+		wait for clock_period;
+
+		--sw
+		IR_addr_out <= "00000000000000000000000000000000";
+		signExtImm <= "00000000000000000000000000000000";
+		des_addr_in <= "00000";
+		--bran_taken <='0';
+		rs <= "00000000000000000000000000000011";
+		rt <= "00000000000000000000000000000000";
+		jump_addr <= "00000000000000000000000000";
+		--wait for clock_period;
+		opcode <= "101011";
+		funct <= "000000";
+		wait for clock_period;
+
+		--lui
+		IR_addr_out <= "00000000000000000000000000000000";
+		signExtImm <= "00000000000000000000000000000000";
+		des_addr_in <= "00000";
+		--bran_taken <='0';
+		rs <= "00000000000000000000000000000011";
+		rt <= "00000000000000000000000000000000";
+		jump_addr <= "00000000000000000000000000";
+		--wait for clock_period;
+		opcode <= "001111";
+		funct <= "000000";
+		wait for clock_period;
+
+		--jr
+		IR_addr_out <= "00000000000000000000000000000000";
+		signExtImm <= "00000000000000000000000000000000";
+		des_addr_in <= "00000";
+		--bran_taken <='0';
+		rs <= "00000000000000000000000000000011";
+		rt <= "00000000000000000000000000000000";
+		jump_addr <= "00000000000000000000000000";
+		--wait for clock_period;
+		opcode <= "000000";
+		funct <= "001000";
 		wait for clock_period;
 		
 		WAIT;
