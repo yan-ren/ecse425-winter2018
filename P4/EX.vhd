@@ -19,7 +19,9 @@ entity EX is
 	bran_taken: out std_logic:= '0';
 	jump_addr : in std_logic_vector(25 DOWNTO 0);
 	sf : out std_logic_vector(63 downto 0);
-	branch_addr: out std_logic_vector(31 downto 0)
+	branch_addr: out std_logic_vector(31 downto 0);
+	hi_out: out std_logic_vector(31 downto 0);
+	lo_out: out std_logic_vector(31 downto 0)
 	--zero: out std_logic := '0'
   );
 end EX;
@@ -67,13 +69,13 @@ ALU_control_process : process(opcode, funct,rs,rt,pc_plus_4,signExtImm,jump_addr
 						temp_bran_taken <= '0';
 						hi<= hilo(63 downto 32);
  						lo<= hilo(31 downto 0);
-						output<=hilo(31 downto 0); 
+						--output<=hilo(31 downto 0); 
 
 					-- div
 					when "011010" =>
-						--hilo <= std_logic_vector(signed(rs) mod signed(rt)) & std_logic_vector(signed(rs) / signed(rs));
-						output <= std_logic_vector(signed(rs) / signed(rt));
-						lo<=output;
+						hilo <= std_logic_vector(signed(rs) mod signed(rt)) & std_logic_vector(signed(rs) / signed(rs));
+						--output <= std_logic_vector(signed(rs) / signed(rt));
+						lo<=std_logic_vector(signed(rs) / signed(rt));
 						hi <= std_logic_vector(signed(rs) mod signed(rt));
 						temp_bran_taken <= '0';
 						--hi<= hilo(63 downto 32);
@@ -236,6 +238,8 @@ ALU_control_process : process(opcode, funct,rs,rt,pc_plus_4,signExtImm,jump_addr
 		des_addr_out<=des_addr_in;
 		rt_out<= rt;
 		sf<=hilo;
+		hi_out<=hi;
+		lo_out<=lo;
 end if;
 	end process;
 
