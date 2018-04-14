@@ -15,17 +15,18 @@ architecture behavior of fetch_tb is
 
 component fetch is
 generic(
-    ram_size : INTEGER := 4096
+    ram_size : INTEGER := 1024
 );
 port(
-    clock : in std_logic;
+  clock : in std_logic;
 
-    -- Avalon interface --
 	branch_address : in std_logic_vector (31 downto 0);
 	branch_taken : in std_logic;
 	
-	PC_mux : out std_logic_vector (31 downto 0);
-	IR : out std_logic_vector (31 downto 0)
+	next_address : out std_logic_vector (31 downto 0);
+	IR : out std_logic_vector (31 downto 0);
+	next_IR : out std_logic_vector (31 downto 0);
+	branch_next : out std_logic
 );
 end component;
 
@@ -38,9 +39,11 @@ constant clk_period : time := 1 ns;
 signal	branch_address : std_logic_vector (31 downto 0);
 signal	branch_taken : std_logic;
 	
-signal	PC_mux : std_logic_vector (31 downto 0);
+signal	next_address : std_logic_vector (31 downto 0);
 signal	IR : std_logic_vector (31 downto 0);
 signal i : integer := 0;
+signal next_IR : std_logic_vector (31 downto 0);
+signal	branch_next : std_logic;
 
 begin
 
@@ -53,8 +56,10 @@ port map(
 	  branch_address => branch_address,
   	 branch_taken => branch_taken,
 	
-	  PC_mux => PC_mux,
-	  IR => IR
+	  next_address => next_address,
+	  IR => IR,
+	  next_IR => next_IR,
+	  branch_next => branch_next
 );
 
 
