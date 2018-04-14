@@ -23,7 +23,13 @@ port(
 	next_address : out std_logic_vector (31 downto 0);
 	IR : out std_logic_vector (31 downto 0);
 	next_IR : out std_logic_vector (31 downto 0);
-	branch_next : out std_logic
+	branch_next : out std_logic;
+	BUF_0 : out std_logic_vector (33 downto 0);
+	BUF_1 : out std_logic_vector (33 downto 0);
+	BUF_2 : out std_logic_vector (33 downto 0);
+	BUF_3 : out std_logic_vector (33 downto 0);
+	BUF_4 : out std_logic_vector (33 downto 0);
+	BUF_5 : out std_logic_vector (33 downto 0)
 );
 end fetch;
 
@@ -71,11 +77,11 @@ begin
 		  END LOOP;
 		  
 		  PC <= "00000000000000000000000000000000";
-		  
+		  branch_next <= '0';
 		  
 		  if ((to_integer(unsigned(instruct_block(0)(31 downto 26))) = 4) OR (to_integer(unsigned(instruct_block(0)(31 downto 26))) = 5)) then
-                 b <= '1';
-                 branch_next <= '1';
+                 
+                 
                  IR_buffer(0) <= "1100000000000000000000000000000000";
                  
                    if ((to_integer(unsigned(instruct_block(1)(31 downto 26))) = 4) OR (to_integer(unsigned(instruct_block(1)(31 downto 26))) = 5)) then
@@ -86,25 +92,42 @@ begin
                  
       end if;
       
-		  next_instruction <= "00000000000000000000000000000001";
+		  next_instruction <= "00000000000000000000000000000010";
 		  next_IR <= next_instruction;
+		  
+		  BUF_0 <= IR_buffer(0);
+	    BUF_1 <= IR_buffer(1);
+	    BUF_2 <= IR_buffer(2);
+	    BUF_3 <= IR_buffer(3);
+	    BUF_4 <= IR_buffer(4); 
+	    BUF_5 <= IR_buffer(5);
+		  
 		end if;
 	
 	if (rising_edge(clock)) THEN 
 	             next_IR <= next_instruction;
-	  
+	             --branch_next <= '0';
                --IR is the instruction later sent to the decode stage
                IR <= instruct_block(to_integer(unsigned(PC)));
-               next_instruction <= instruct_block(to_integer(unsigned(PC))+2);
+               next_instruction <= std_logic_vector(to_unsigned(to_integer(unsigned(PC))+3, 32));
+               
+               BUF_0 <= IR_buffer(0);
+	             BUF_1 <= IR_buffer(1);
+	             BUF_2 <= IR_buffer(2);
+	             BUF_3 <= IR_buffer(3);
+	             BUF_4 <= IR_buffer(4); 
+	             BUF_5 <= IR_buffer(5);
                
                
 	             --if branch is taken, puts branch address into PC_MUX and PC
 	             if(branch_taken = '1') then
 				        
-				          For j in 1 to 5 LOOP
+			loop_1:	    For j in 1 to 5 LOOP
 				            if (IR_buffer(j)(33) = '1') then
-				              
-				                if (IR_buffer(j)(31 downto 0) = branch_address) then
+				              if (j=4) then
+				              branch_next <= '1';
+				              end if;
+				                 if (IR_buffer(j)(31 downto 0) = branch_address) then
 				                    For t in 1 to 5 LOOP
 				                       if(IR_buffer(t)(32) = '1') then
 		                              IR_buffer(0) <= IR_buffer(t);
@@ -113,9 +136,16 @@ begin
 		                                    IR_buffer(y-t) <= IR_buffer(y);
 		                                    IR_buffer(y)(33) <= '0';
 		                                  end loop;
-		                               exit;
+		                                  next_address <= std_logic_vector(to_unsigned(to_integer(unsigned(PC))+1, 32));
+  	                                   PC <= std_logic_vector(to_unsigned(to_integer(unsigned(PC))+1, 32));
+		                               exit loop_1;
 		                            else 
-		                              IR_buffer(j)(33) <= '0';
+		                              IR_buffer(t) <= "00" & "00000000000000000000000000000000";
+		                              if (t=5) then
+		                                next_address <= std_logic_vector(to_unsigned(to_integer(unsigned(PC))+1, 32));
+  	                                   PC <= std_logic_vector(to_unsigned(to_integer(unsigned(PC))+1, 32));
+		                               exit loop_1;
+		                              end if;
 		                            end if;
 		                         END LOOP;
 		                         next_address <= std_logic_vector(to_unsigned(to_integer(unsigned(PC))+1, 32));
@@ -123,15 +153,17 @@ begin
 		                     elsif (j=5) then
 		                        next_address <= branch_address; 
 				                    PC <= branch_address; 
+				                    
 				                    For x in 0 to 5 LOOP
-				                        IR_buffer(x)(33) <= '0';
+				                        IR_buffer(x) <= "00" & "00000000000000000000000000000000";
 				                    end loop;
-				                end if;
-				             else
+				                 end if;
+				            elsif (IR_buffer(j)(33) = '0') then
+				               
 				               next_address <= branch_address; 
 				               PC <= branch_address; 
 				               For x in 0 to 5 LOOP
-				                 IR_buffer(x)(33) <= '0';
+				                 IR_buffer(x) <= "00" & "00000000000000000000000000000000";
 				               end loop;
 				               exit;
 				            end if;
@@ -157,7 +189,7 @@ begin
 		                                  end loop;
 		                               exit;
 		                            else 
-		                              IR_buffer(j)(33) <= '0';
+		                              IR_buffer(j) <= "00" & "00000000000000000000000000000000";
 		                            end if;
 		                        END LOOP;
 		                     
@@ -176,11 +208,16 @@ begin
 		                         END LOOP;
 		                     end if;
 				                
-				         
+				          else
+				              if ((to_integer(unsigned(instruct_block(to_integer(unsigned(next_instruction)))(31 downto 26))) = 4) OR (to_integer(unsigned(instruct_block(to_integer(unsigned(next_instruction)))(31 downto 26))) = 5)) then
+                            IR_buffer(0) <= "11" & next_instruction;
+              
+       end if;
 				          end if;
     	             
     	             
 				       end if;
+				       
 	     
 	end if;	
 end process;	

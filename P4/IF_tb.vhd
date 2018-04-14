@@ -8,31 +8,24 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-entity fetch_tb is
-end fetch_tb;
+entity IF_tb is
+end IF_tb;
 
-architecture behavior of fetch_tb is
+architecture behavior of IF_tb is
 
-component fetch is
+component InsF is
 generic(
-    ram_size : INTEGER := 1024
+    ram_size : INTEGER := 4096
 );
 port(
-  clock : in std_logic;
+    clock : in std_logic;
 
+    -- Avalon interface --
 	branch_address : in std_logic_vector (31 downto 0);
 	branch_taken : in std_logic;
 	
 	next_address : out std_logic_vector (31 downto 0);
-	IR : out std_logic_vector (31 downto 0);
-	next_IR : out std_logic_vector (31 downto 0);
-	branch_next : out std_logic;
-	BUF_0 : out std_logic_vector (33 downto 0);
-	BUF_1 : out std_logic_vector (33 downto 0);
-	BUF_2 : out std_logic_vector (33 downto 0);
-	BUF_3 : out std_logic_vector (33 downto 0);
-	BUF_4 : out std_logic_vector (33 downto 0);
-	BUF_5 : out std_logic_vector (33 downto 0)
+	IR : out std_logic_vector (31 downto 0)
 );
 end component;
 
@@ -48,20 +41,12 @@ signal	branch_taken : std_logic;
 signal	next_address : std_logic_vector (31 downto 0);
 signal	IR : std_logic_vector (31 downto 0);
 signal i : integer := 0;
-signal next_IR : std_logic_vector (31 downto 0);
-signal	branch_next : std_logic;
-signal BUF_0 : std_logic_vector (33 downto 0);
-signal	BUF_1 : std_logic_vector (33 downto 0);
-signal	BUF_2 : std_logic_vector (33 downto 0);
-signal	BUF_3 : std_logic_vector (33 downto 0);
-signal	BUF_4 : std_logic_vector (33 downto 0);
-signal	BUF_5 : std_logic_vector (33 downto 0);
 
 begin
 
 -- Connect the components which we instantiated above to their
 -- respective signals.
-dut: fetch
+dut: InsF
 port map(
     clock => clk,
 
@@ -69,15 +54,7 @@ port map(
   	 branch_taken => branch_taken,
 	
 	  next_address => next_address,
-	  IR => IR,
-	  next_IR => next_IR,
-	  branch_next => branch_next,
-	  BUF_0 => BUF_0,
-	  BUF_1 => BUF_1,
-	  BUF_2 => BUF_2,
-	  BUF_3 => BUF_3,
-	  BUF_4 => BUF_4,
-	  BUF_5 => BUF_5
+	  IR => IR
 );
 
 
